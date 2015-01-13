@@ -74,7 +74,6 @@ For Lua 5.1 additionally:
 * `luaL_fileresult`
 * `luaL_checkversion` (with empty body, only to avoid compile errors)
 * `luaL_tolstring`
-* `luaL_requiref`
 * `lua_pushunsigned`, `lua_tounsignedx`, `lua_tounsigned`,
   `luaL_checkunsigned`, `luaL_optunsigned`, if
   `LUA_COMPAT_APIINTCASTS` is defined.
