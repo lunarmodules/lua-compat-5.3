@@ -1,0 +1,8 @@
+# generated files
+*.so
+*.dll
+HISTO
+
+# vim temporaries
+.*.swp
+
