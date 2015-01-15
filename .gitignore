@@ -1,6 +1,8 @@
 # generated files
 *.so
 *.dll
+*.o
+*.obj
 HISTO
 
 # vim temporaries

@@ -12,12 +12,32 @@ compatible with Lua 5.3, but it brings the API closer to that of Lua
 
 It includes:
 
+* _For writing Lua_: The Lua module `compat53`, which can be require'd
+  from Lua scripts and run in Lua 5.1, 5.2, and 5.3, including a
+  backport of the `utf8` module straight from the Lua 5.3 sources.
 * _For writing C_: A C header and file which can be linked to your
   Lua module written in C, providing some functions from the C API
   of Lua 5.3 that do not exist in Lua 5.2 or 5.1, making it easier to
   write C code that compiles with all three versions of liblua.
 
 ## How to use it
+
+### Lua module
+
+```lua
+require("compat53")
+```
+
+`compat53` makes changes to your global environment and does not return
+a meaningful return value, so the usual idiom of storing the return of
+`require` in a local variable makes no sense.
+
+When run under Lua 5.3, this module does nothing.
+
+Wehn run under Lua 5.2 or 5.1, it replaces some of your standard
+functions and adds new ondes to bring your environment closer to that
+of Lua 5.3. It also loads the backported `utf8` module automatically,
+and tries to use [Roberto's struct library][1].
 
 ### C code
 
@@ -37,6 +57,13 @@ your project:
 
 ## What's implemented
 
+### Lua
+
+* the `utf8` module backported from the Lua 5.3 sources
+* `string.pack`, `string.packsize`, and `string.unpack` if the
+  `struct` module is available. (`struct` is not 100% compatible
+  to Lua 5.3's string packing!)
+
 ### C
 
 * `lua_KContext`
@@ -53,7 +80,7 @@ your project:
 * `lua_callk` and `lua_pcallk` (limited compatibility)
 * `lua_rawget` and `lua_rawgeti` (return values)
 * `lua_rawgetp` and `lua_rawsetp`
-* `luaL_requiref` (now checks `package.loaded`)
+* `luaL_requiref` (now checks `package.loaded` first)
 * `lua_rotate`
 * `lua_stringtonumber`
 
@@ -82,9 +109,8 @@ For Lua 5.1 additionally:
 
 * the new Lua functions of Lua 5.3
 * the table library doesn't respect metamethods yet
-* the utf8 library
-* string packing/unpacking
-* Lua 5.1: `_ENV`, `goto`, labels, ephemeron tables, etc.
+* Lua 5.1: `_ENV`, `goto`, labels, ephemeron tables, etc. See
+  [`lua-compat-5.2`][2] for a detailed list.
 * the following C API functions/macros:
   * `lua_isyieldable`
   * `lua_getextraspace`
@@ -104,11 +130,9 @@ For Lua 5.1 additionally:
 
 ## See also
 
-* For Lua-5.2-style APIs under Lua 5.1, see
-[lua-compat-5.2](http://github.com/keplerproject/lua-compat-5.2/),
-which also is the basis for most of the code in this project.
-* For Lua-5.1-style APIs under Lua 5.0, see
-[Compat-5.1](http://keplerproject.org/compat/)
+* For Lua-5.2-style APIs under Lua 5.1, see [lua-compat-5.2][2],
+  which also is the basis for most of the code in this project.
+* For Lua-5.1-style APIs under Lua 5.0, see [Compat-5.1][3]
 
 ## Credits
 
@@ -119,4 +143,9 @@ This package contains code written by:
 * Tomás Guisasola Gorham ([@tomasguisasola](http://github.com/tomasguisasola))
 * Hisham Muhammad ([@hishamhm](http://github.com/hishamhm))
 * Renato Maia ([@renatomaia](http://github.com/renatomaia))
+
+
+  [1]: http://www.inf.puc-rio.br/~roberto/struct/
+  [2]: http://github.com/keplerproject/lua-compat-5.2/
+  [3]: http://keplerproject.org/compat/
 
