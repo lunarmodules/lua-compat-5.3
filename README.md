@@ -34,8 +34,8 @@ a meaningful return value, so the usual idiom of storing the return of
 
 When run under Lua 5.3, this module does nothing.
 
-Wehn run under Lua 5.2 or 5.1, it replaces some of your standard
-functions and adds new ondes to bring your environment closer to that
+When run under Lua 5.2 or 5.1, it replaces some of your standard
+functions and adds new ones to bring your environment closer to that
 of Lua 5.3. It also loads the backported `utf8` module automatically,
 and tries to use [Roberto's struct library][1].
 
