@@ -63,6 +63,8 @@ your project:
 * `string.pack`, `string.packsize`, and `string.unpack` if the
   `struct` module is available. (`struct` is not 100% compatible
   to Lua 5.3's string packing!)
+* `math.maxinteger` and `math.mininteger`, `math.tointeger`, `math.type`,
+  and `math.ult`
 
 ### C
 
@@ -107,8 +109,11 @@ For Lua 5.1 additionally:
 
 ## What's not implemented
 
-* the new Lua functions of Lua 5.3
-* the table library doesn't respect metamethods yet
+* bit operators
+* integer division operator
+* `table.move`
+* `coroutine.isyieldable`
+* `ipairs` and the `table` library don't respect metamethods yet
 * Lua 5.1: `_ENV`, `goto`, labels, ephemeron tables, etc. See
   [`lua-compat-5.2`][2] for a detailed list.
 * the following C API functions/macros:
