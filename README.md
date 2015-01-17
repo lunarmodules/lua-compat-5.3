@@ -65,6 +65,7 @@ your project:
   to Lua 5.3's string packing!)
 * `math.maxinteger` and `math.mininteger`, `math.tointeger`, `math.type`,
   and `math.ult`
+* `ipairs` respects `__index` metamethod
 
 ### C
 
@@ -113,7 +114,7 @@ For Lua 5.1 additionally:
 * integer division operator
 * `table.move`
 * `coroutine.isyieldable`
-* `ipairs` and the `table` library don't respect metamethods yet
+* `table` library doesn't respect metamethods yet
 * Lua 5.1: `_ENV`, `goto`, labels, ephemeron tables, etc. See
   [`lua-compat-5.2`][2] for a detailed list.
 * the following C API functions/macros:

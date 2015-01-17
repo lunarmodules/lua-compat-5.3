@@ -1,6 +1,11 @@
 local lua_version = _VERSION:sub(-3)
 
 if lua_version ~= "5.3" then
+   local _type = type
+   -- select the most powerful getmetatable function available
+   local gmt = _type(debug) == "table" and debug.getmetatable or
+               getmetatable or function() return false end
+   local checkinteger -- forward declararation
 
    -- load utf8 library
    local ok, utf8lib = pcall(require, "compat53.utf8")
@@ -41,7 +46,6 @@ if lua_version ~= "5.3" then
       math.maxinteger = maxint
       math.mininteger = minint
 
-      local _type = type
       function math.tointeger(n)
          if _type(n) == "number" and n <= maxint and n >= minint and n % 1 == 0 then
             return n
@@ -62,7 +66,7 @@ if lua_version ~= "5.3" then
       end
 
       local _error = error
-      local function checkinteger(x, i, f)
+      function checkinteger(x, i, f)
          local t = _type(x)
          if t ~= "number" then
             _error("bad argument #"..i.." to '"..f..
@@ -84,6 +88,26 @@ if lua_version ~= "5.3" then
             return false
          else
             return m < n
+         end
+      end
+   end
+
+
+   -- ipairs should respect __index metamethod
+   do
+      local _ipairs = ipairs
+      local function ipairs_iterator(st, var)
+         var = var + 1
+         local val = st[var]
+         if val ~= nil then
+            return var, st[var]
+         end
+      end
+      function ipairs(t)
+         if gmt(t) ~= nil then -- t has metatable
+            return ipairs_iterator, t, 0
+         else
+            return _ipairs(t)
          end
       end
    end

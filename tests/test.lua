@@ -22,6 +22,16 @@ end
 print( "testing Lua API ..." )
 package.path = "../?.lua;"..package.path
 require("compat53")
+
+___''
+do
+  local t = setmetatable( {}, { __index = { 1, false, "three" } } )
+  for i,v in ipairs(t) do
+    print("ipairs", i, v)
+  end
+end
+
+
 ___''
 print("math.maxinteger", math.maxinteger+1 > math.maxinteger)
 print("math.mininteger", math.mininteger-1 < math.mininteger)
