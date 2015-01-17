@@ -1,6 +1,6 @@
 #!/usr/bin/env lua
 
-local F, ___
+local F, tproxy, ___
 do
   local type, unpack = type, table.unpack or unpack
   function F(...)
@@ -12,6 +12,13 @@ do
       end
     end
     return unpack(args, 1, n)
+  end
+  function tproxy(t)
+    return setmetatable({}, {
+      __index = t,
+      __newindex = t,
+      __len = function() return #t end,
+    }), t
   end
   local sep = ("="):rep(70)
   function ___()
@@ -29,6 +36,113 @@ do
   for i,v in ipairs(t) do
     print("ipairs", i, v)
   end
+end
+
+
+___''
+do
+  local p, t = tproxy{ "a", "b", "c" }
+  print("table.concat", table.concat(p))
+  print("table.concat", table.concat(p, ",", 2))
+  print("table.concat", table.concat(p, ".", 1, 2))
+  print("table.concat", table.concat(t))
+  print("table.concat", table.concat(t, ",", 2))
+  print("table.concat", table.concat(t, ".", 1, 2))
+end
+
+
+___''
+do
+  local p, t = tproxy{ "a", "b", "c" }
+  table.insert(p, "d")
+  print("table.insert", next(p), t[4])
+  table.insert(p, 1, "z")
+  print("table.insert", next(p),  t[1], t[2])
+  table.insert(p, 2, "y")
+  print("table.insert", next(p), t[1], t[2], p[3])
+  t = { "a", "b", "c" }
+  table.insert(t, "d")
+  print("table.insert", t[1], t[2], t[3], t[4])
+  table.insert(t, 1, "z")
+  print("table.insert", t[1], t[2], t[3], t[4], t[5])
+  table.insert(t, 2, "y")
+  print("table.insert", t[1], t[2], t[3], t[4], t[5])
+end
+
+
+___''
+do
+  local ps, s = tproxy{ "a", "b", "c", "d" }
+  local pd, d = tproxy{ "A", "B", "C", "D" }
+  table.move(ps, 1, 4, 1, pd)
+  print("table.move", next(pd), d[1], d[2], d[3], d[4])
+  pd, d = tproxy{ "A", "B", "C", "D" }
+  table.move(ps, 2, 4, 1, pd)
+  print("table.move", next(pd), d[1], d[2], d[3], d[4])
+  pd, d = tproxy{ "A", "B", "C", "D" }
+  table.move(ps, 2, 3, 4, pd)
+  print("table.move", next(pd), d[1], d[2], d[3], d[4], d[5])
+  table.move(ps, 2, 4, 1)
+  print("table.move", next(ps), s[1], s[2], s[3], s[4])
+  ps, s = tproxy{ "a", "b", "c", "d" }
+  table.move(ps, 2, 3, 4)
+  print("table.move", next(ps), s[1], s[2], s[3], s[4], s[5])
+  s = { "a", "b", "c", "d" }
+  d = { "A", "B", "C", "D" }
+  table.move(s, 1, 4, 1, d)
+  print("table.move", d[1], d[2], d[3], d[4])
+  d = { "A", "B", "C", "D" }
+  table.move(s, 2, 4, 1, d)
+  print("table.move", d[1], d[2], d[3], d[4])
+  d = { "A", "B", "C", "D" }
+  table.move(s, 2, 3, 4, d)
+  print("table.move", d[1], d[2], d[3], d[4], d[5])
+  table.move(s, 2, 4, 1)
+  print("table.move", s[1], s[2], s[3], s[4])
+  s = { "a", "b", "c", "d" }
+  table.move(s, 2, 3, 4)
+  print("table.move", s[1], s[2], s[3], s[4], s[5])
+end
+
+
+___''
+do
+  local p, t = tproxy{ "a", "b", "c", "d", "e" }
+  print("table.remove", table.remove(p))
+  print("table.remove", next(p), t[1], t[2], t[3], t[4], t[5])
+  print("table.remove", table.remove(p, 1))
+  print("table.remove", next(p), t[1], t[2], t[3], t[4])
+  print("table.remove", table.remove(p, 2))
+  print("table.remove", next(p), t[1], t[2], t[3])
+  print("table.remove", table.remove(p, 3))
+  print("table.remove", next(p), t[1], t[2], t[3])
+  p, t = tproxy{}
+  print("table.remove", table.remove(p))
+  print("table.remove", next(p), next(t))
+  t = { "a", "b", "c", "d", "e" }
+  print("table.remove", table.remove(t))
+  print("table.remove", t[1], t[2], t[3], t[4], t[5])
+  print("table.remove", table.remove(t, 1))
+  print("table.remove", t[1], t[2], t[3], t[4])
+  print("table.remove", table.remove(t, 2))
+  print("table.remove", t[1], t[2], t[3])
+  print("table.remove", table.remove(t, 3))
+  print("table.remove", t[1], t[2], t[3])
+  t = {}
+  print("table.remove", table.remove(t))
+  print("table.remove", next(t))
+end
+
+
+___''
+do
+  local p, t = tproxy{ "a", "b", "c" }
+  print("table.unpack", table.unpack(p))
+  print("table.unpack", table.unpack(p, 2))
+  print("table.unpack", table.unpack(p, 1, 2))
+  print("table.unpack", table.unpack(t))
+  print("table.unpack", table.unpack(t, 2))
+  print("table.unpack", table.unpack(t, 1, 2))
 end
 
 

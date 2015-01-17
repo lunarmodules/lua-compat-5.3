@@ -66,6 +66,8 @@ your project:
 * `math.maxinteger` and `math.mininteger`, `math.tointeger`, `math.type`,
   and `math.ult`
 * `ipairs` respects `__index` metamethod
+* `table.move`
+* `table` library (except `table.sort`) respects metamethods
 
 ### C
 
@@ -112,9 +114,8 @@ For Lua 5.1 additionally:
 
 * bit operators
 * integer division operator
-* `table.move`
 * `coroutine.isyieldable`
-* `table` library doesn't respect metamethods yet
+* `table.sort` doesn't respect metamethods yet
 * Lua 5.1: `_ENV`, `goto`, labels, ephemeron tables, etc. See
   [`lua-compat-5.2`][2] for a detailed list.
 * the following C API functions/macros:
