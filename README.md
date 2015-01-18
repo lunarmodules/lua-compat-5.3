@@ -67,7 +67,28 @@ your project:
   and `math.ult`
 * `ipairs` respects `__index` metamethod
 * `table.move`
-* `table` library (except `table.sort`) respects metamethods
+* `table` library respects metamethods
+
+For Lua 5.1 additionally:
+* `load` and `loadfile` accept `mode` and `env` parameters
+* `table.pack` and `table.unpack`
+* string patterns may contain embedded zeros
+* `string.rep` accepts `sep` argument
+* `string.format` calls `tostring` on arguments for `%s`
+* `math.log` accepts base argument
+* `xpcall` takes additional arguments
+* `pcall` and `xpcall` can execute functions that yield
+* `pairs` respects `__pairs` metamethod
+* `rawlen` (but `#` still doesn't respect `__len` for tables)
+* `package.searchers` as alias for `package.loaders`
+* `package.searchpath`
+* `coroutine` functions dealing with the main coroutine
+* `coroutine.create` accepts functions written in C
+* return code of `os.execute`
+* `io.write` and `file:write` return file handle
+* `io.lines` and `file:lines` accept format arguments (like `io.read`)
+* `debug.setmetatable` returns object
+* `debug.getuservalue` and `debug.setuservalue`
 
 ### C
 
@@ -115,7 +136,6 @@ For Lua 5.1 additionally:
 * bit operators
 * integer division operator
 * `coroutine.isyieldable`
-* `table.sort` doesn't respect metamethods yet
 * Lua 5.1: `_ENV`, `goto`, labels, ephemeron tables, etc. See
   [`lua-compat-5.2`][2] for a detailed list.
 * the following C API functions/macros:
