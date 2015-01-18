@@ -133,6 +133,46 @@ do
   print("table.remove", next(t))
 end
 
+___''
+do
+  local p, t = tproxy{ 3, 1, 5, 2, 8, 5, 2, 9, 7, 4 }
+  table.sort(p)
+  print("table.sort", next(p))
+  for i,v in ipairs(t) do
+    print("table.sort", i, v)
+  end
+  table.sort(p)
+  print("table.sort", next(p))
+  for i,v in ipairs(t) do
+    print("table.sort", i, v)
+  end
+  p, t = tproxy{ 9, 8, 7, 6, 5, 4, 3, 2, 1 }
+  table.sort(p)
+  print("table.sort", next(p))
+  for i,v in ipairs(t) do
+    print("table.sort", i, v)
+  end
+  table.sort(p, function(a, b) return a > b end)
+  print("table.sort", next(p))
+  for i,v in ipairs(t) do
+    print("table.sort", i, v)
+  end
+  p, t = tproxy{ 1, 1, 1, 1, 1 }
+  print("table.sort", next(p))
+  for i,v in ipairs(t) do
+    print("table.sort", i, v)
+  end
+  t = { 3, 1, 5, 2, 8, 5, 2, 9, 7, 4 }
+  table.sort(t)
+  for i,v in ipairs(t) do
+    print("table.sort", i, v)
+  end
+  table.sort(t, function(a, b) return a > b end)
+  for i,v in ipairs(t) do
+    print("table.sort", i, v)
+  end
+end
+
 
 ___''
 do
