@@ -52,5 +52,22 @@
 #  define luaopen_utf8 luaopen_compat53_utf8
 #endif
 
+#ifdef ltablib_c
+#  define luaopen_table luaopen_compat53_table
+static int compat53_rawgeti (lua_State *L, int i, lua_Integer n) {
+  return lua_rawgeti(L, i, n);
+}
+#  undef lua_rawgeti
+#  define lua_rawgeti compat53_rawgeti
+static void compat53_rawseti (lua_State *L, int i, lua_Integer n) {
+  lua_rawseti(L, i, (int)n);
+}
+#  undef lua_rawseti
+#  define lua_rawseti compat53_rawseti
+#  if LUA_VERSION_NUM == 501
+#    define lua_compare(L, a, b, op) lua_lessthan(L, a, b)
+#  endif
+#endif /* ltablib_c */
+
 #endif
 

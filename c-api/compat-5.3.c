@@ -36,7 +36,8 @@ COMPAT53_API void lua_len (lua_State *L, int i) {
   switch (lua_type(L, i)) {
     case LUA_TSTRING: /* fall through */
     case LUA_TTABLE:
-      lua_pushnumber(L, (int)lua_objlen(L, i));
+      if (!luaL_callmeta(L, i, "__len"))
+        lua_pushnumber(L, (int)lua_objlen(L, i));
       break;
     case LUA_TUSERDATA:
       if (luaL_callmeta(L, i, "__len"))

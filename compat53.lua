@@ -27,8 +27,8 @@ if lua_version < "5.3" then
 
 
    -- load utf8 library
-   local ok, utf8lib = pcall(require, "compat53.utf8")
-   if ok then
+   local utf8_ok, utf8lib = pcall(require, "compat53.utf8")
+   if utf8_ok then
       utf8 = utf8lib
       package.loaded["utf8"] = utf8lib
       if lua_version == "5.1" then
@@ -37,12 +37,20 @@ if lua_version < "5.3" then
    end
 
 
+   -- load table library
+   local table_ok, tablib = pcall(require, "compat53.table")
+   if table_ok then
+      table = tablib
+      package.loaded["table"] = tablib
+   end
+
+
    -- use Roberto's struct module for string packing/unpacking for now
    -- maybe we'll later extract the functions from the 5.3 string
    -- library for greater compatiblity, but it uses the 5.3 buffer API
    -- which cannot easily be backported to Lua 5.1.
-   local ok, struct = pcall(require, "struct")
-   if ok then
+   local struct_ok, struct = pcall(require, "struct")
+   if struct_ok then
       string.pack = struct.pack
       string.packsize = struct.size
       string.unpack = struct.unpack
@@ -132,8 +140,8 @@ if lua_version < "5.3" then
    end
 
 
-   -- update table library
-   do
+   -- update table library (if C module not available)
+   if not table_ok then
       local table_concat = table.concat
       function table.concat(list, sep, i, j)
          local mt = gmt(list)
@@ -298,7 +306,7 @@ if lua_version < "5.3" then
             return table_unpack(list, i, j)
          end
       end
-   end
+   end -- update table library
 
 
 
@@ -576,7 +584,7 @@ if lua_version < "5.3" then
       end
 
 
-      if not is_luajit52 then
+      if not table_ok and not is_luajit52 then
          table.pack = function(...)
             return { n = select('#', ...), ... }
          end
