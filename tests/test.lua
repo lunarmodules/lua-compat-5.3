@@ -1,8 +1,9 @@
 #!/usr/bin/env lua
 
-local F, tproxy, ___
+local F, tproxy, writefile, noprint, ___
 do
   local type, unpack = type, table.unpack or unpack
+  local assert, io = assert, io
   function F(...)
     local args, n = { ... }, select('#', ...)
     for i = 1, n do
@@ -20,6 +21,12 @@ do
       __len = function() return #t end,
     }), t
   end
+  function writefile(name, contents, bin)
+    local f = assert(io.open(name, bin and "wb" or "w"))
+    f:write(contents)
+    f:close()
+  end
+  function noprint() end
   local sep = ("="):rep(70)
   function ___()
     print(sep)
@@ -27,6 +34,7 @@ do
 end
 
 local V = _VERSION:gsub("^.*(%d+)%.(%d+)$", "%1%2")
+if jit then V = "jit" end
 
 print( "testing Lua API ..." )
 package.path = "../?.lua;"..package.path
@@ -216,6 +224,342 @@ print("math.ult", pcall(math.ult, "x", 2))
 print("math.ult", pcall(math.ult, 1, 2.1))
 ___''
 
+
+print("testing Lua API for Lua 5.1 ...")
+
+___''
+print("debug.getuservalue()", F(debug.getuservalue(false)))
+print("debug.setuservalue()", pcall(function()
+  debug.setuservalue(false, {})
+end))
+print("debug.setmetatable()", F(debug.setmetatable({}, {})))
+
+
+___''
+do
+   local t = setmetatable({}, {
+      __pairs = function() return pairs({ a = "a" }) end,
+   })
+   for k,v in pairs(t) do
+      print("pairs()", k, v)
+   end
+end
+
+
+___''
+do
+   local code = "print('hello world')\n"
+   local badcode = "print('blub\n"
+   print("load()", pcall(function() load(true) end))
+   print("load()", F(load(badcode)))
+   print("load()", F(load(code)))
+   print("load()", F(load(code, "[L]")))
+   print("load()", F(load(code, "[L]", "b")))
+   print("load()", F(load(code, "[L]", "t")))
+   print("load()", F(load(code, "[L]", "bt")))
+   local f = load(code, "[L]", "bt", {})
+   print("load()", pcall(f))
+   f = load(code, "[L]", "bt", { print = noprint })
+   print("load()", pcall(f))
+   local bytecode = string.dump(f)
+   print("load()", F(load(bytecode)))
+   print("load()", F(load(bytecode, "[L]")))
+   print("load()", F(load(bytecode, "[L]", "b")))
+   print("load()", F(load(bytecode, "[L]", "t")))
+   print("load()", F(load(bytecode, "[L]", "bt")))
+   f = load(bytecode, "[L]", "bt", {})
+   print("load()", pcall(f))
+   f = load(bytecode, "[L]", "bt", { print = noprint })
+   print("load()", pcall(f))
+   local function make_loader(code)
+      local mid = math.floor( #code/2 )
+      local array = { code:sub(1, mid), code:sub(mid+1) }
+      local i = 0
+      return function()
+         i = i + 1
+         return array[i]
+      end
+   end
+   print("load()", F(load(make_loader(badcode))))
+   print("load()", F(load(make_loader(code))))
+   print("load()", F(load(make_loader(code), "[L]")))
+   print("load()", F(load(make_loader(code), "[L]", "b")))
+   print("load()", F(load(make_loader(code), "[L]", "t")))
+   print("load()", F(load(make_loader(code), "[L]", "bt")))
+   f = load(make_loader(code), "[L]", "bt", {})
+   print("load()", pcall(f))
+   f = load(make_loader(code), "[L]", "bt", { print = noprint })
+   print("load()", pcall(f))
+   print("load()", F(load(make_loader(bytecode))))
+   print("load()", F(load(make_loader(bytecode), "[L]")))
+   print("load()", F(load(make_loader(bytecode), "[L]", "b")))
+   print("load()", F(load(make_loader(bytecode), "[L]", "t")))
+   print("load()", F(load(make_loader(bytecode), "[L]", "bt")))
+   f = load(make_loader(bytecode), "[L]", "bt", {})
+   print("load()", pcall(f))
+   f = load(make_loader(bytecode), "[L]", "bt", { print = noprint })
+   print("load()", pcall(f))
+   writefile("good.lua", code)
+   writefile("bad.lua", badcode)
+   writefile("good.luac", bytecode, true)
+   print("loadfile()", F(loadfile("bad.lua")))
+   print("loadfile()", F(loadfile("good.lua")))
+   print("loadfile()", F(loadfile("good.lua", "b")))
+   print("loadfile()", F(loadfile("good.lua", "t")))
+   print("loadfile()", F(loadfile("good.lua", "bt")))
+   f = loadfile("good.lua", "bt", {})
+   print("loadfile()", pcall(f))
+   f = loadfile("good.lua", "bt", { print = noprint })
+   print("loadfile()", pcall(f))
+   print("loadfile()", F(loadfile("good.luac")))
+   print("loadfile()", F(loadfile("good.luac", "b")))
+   print("loadfile()", F(loadfile("good.luac", "t")))
+   print("loadfile()", F(loadfile("good.luac", "bt")))
+   f = loadfile("good.luac", "bt", {})
+   print("loadfile()", pcall(f))
+   f = loadfile("good.luac", "bt", { print = noprint })
+   print("loadfile()", pcall(f))
+   os.remove("good.lua")
+   os.remove("bad.lua")
+   os.remove("good.luac")
+end
+
+
+___''
+do
+   local function func(throw)
+      if throw then
+         error("argh")
+      else
+         return 1, 2, 3
+      end
+   end
+   local function tb(err) return "|"..err.."|" end
+   print("xpcall()", xpcall(func, debug.traceback, false))
+   print("xpcall()", xpcall(func, debug.traceback, true))
+   print("xpcall()", xpcall(func, tb, true))
+   local function func2(cb)
+     print("xpcall()", xpcall(cb, debug.traceback, "str"))
+   end
+   local function func3(cb)
+     print("pcall()", pcall(cb, "str"))
+   end
+   local function cb(arg)
+      coroutine.yield(2)
+      return arg
+   end
+   local c = coroutine.wrap(func2)
+   print("xpcall()", c(cb))
+   print("xpcall()", c())
+   local c = coroutine.wrap(func3)
+   print("pcall()", c(cb))
+   print("pcall()", c())
+end
+
+
+___''
+do
+   local t = setmetatable({ 1 }, { __len = function() return 5 end })
+   print("rawlen()", rawlen(t), rawlen("123"))
+end
+
+
+___''
+print("os.execute()", os.execute("exit 1"))
+io.flush()
+print("os.execute()", os.execute("echo 'hello world!'"))
+io.flush()
+print("os.execute()", os.execute("no_such_file"))
+
+
+___''
+do
+   local t = table.pack("a", nil, "b", nil)
+   print("table.(un)pack()", t.n, table.unpack(t, 1, t.n))
+end
+
+
+___''
+do
+   print("coroutine.running()", F(coroutine.wrap(function()
+      return coroutine.running()
+   end)()))
+   print("coroutine.running()", F(coroutine.running()))
+   local main_co, co1, co2 = coroutine.running()
+   -- coroutine.yield
+   print("coroutine.yield()", pcall(function()
+      coroutine.yield(1, 2, 3)
+   end))
+   print("coroutine.yield()", coroutine.wrap(function()
+      coroutine.yield(1, 2, 3)
+   end)())
+   print("coroutine.resume()", coroutine.resume(main_co, 1, 2, 3))
+   co1 = coroutine.create(function(a, b, c)
+      print("coroutine.resume()", a, b, c)
+      return a, b, c
+   end)
+   print("coroutine.resume()", coroutine.resume(co1, 1, 2, 3))
+   co1 = coroutine.create(function()
+      print("coroutine.status()", "[co1] main is", coroutine.status(main_co))
+      print("coroutine.status()", "[co1] co2 is", coroutine.status(co2))
+   end)
+   co2 = coroutine.create(function()
+      print("coroutine.status()", "[co2] main is", coroutine.status(main_co))
+      print("coroutine.status()", "[co2] co2 is", coroutine.status(co2))
+      coroutine.yield()
+      coroutine.resume(co1)
+   end)
+   print("coroutine.status()", coroutine.status(main_co))
+   print("coroutine.status()", coroutine.status(co2))
+   coroutine.resume(co2)
+   print("coroutine.status()", F(coroutine.status(co2)))
+   coroutine.resume(co2)
+   print("coroutine.status()", F(coroutine.status(co2)))
+end
+
+
+___''
+print("math.log()", math.log(1000))
+print("math.log()", math.log(1000, 10))
+
+
+___''
+do
+   local path, prefix = "./?.lua;?/init.lua;../?.lua", "package.searchpath()"
+   print(prefix, package.searchpath("no.such.module", path))
+   print(prefix, package.searchpath("no.such.module", ""))
+   print(prefix, package.searchpath("compat52", path))
+   print(prefix, package.searchpath("no:such:module", path, ":", "|"))
+end
+
+
+___''
+do
+   local function mod_func() return {} end
+   local function my_searcher(name)
+      if name == "my.module" then
+         print("package.searchers", "my.module found")
+         return mod_func
+      end
+   end
+   local function my_searcher2(name)
+      if name == "my.module" then
+         print("package.searchers", "my.module found 2")
+         return mod_func
+      end
+   end
+   table.insert(package.searchers, my_searcher)
+   require("my.module")
+   package.loaded["my.module"] = nil
+   local new_s = { my_searcher2 }
+   for i,f in ipairs(package.searchers) do
+      new_s[i+1] = f
+   end
+   package.searchers = new_s
+   require("my.module")
+end
+
+
+___''
+do
+   print("string.find()", ("abc\0abc\0abc"):find("[^a\0]+"))
+   print("string.find()", ("abc\0abc\0abc"):find("%w+\0", 5))
+   for x in ("abc\0def\0ghi"):gmatch("[^\0]+") do
+      print("string.gmatch()", x)
+   end
+   for x in ("abc\0def\0ghi"):gmatch("%w*\0") do
+      print("string.gmatch()", #x)
+   end
+   print("string.gsub()", ("abc\0def\0ghi"):gsub("[\0]", "X"))
+   print("string.gsub()", ("abc\0def\0ghi"):gsub("%w*\0", "X"))
+   print("string.gsub()", ("abc\0def\0ghi"):gsub("%A", "X"))
+   print("string.match()", ("abc\0abc\0abc"):match("([^\0a]+)"))
+   print("string.match()", #("abc\0abc\0abc"):match(".*\0"))
+   print("string.rep()", string.rep("a", 0))
+   print("string.rep()", string.rep("b", 1))
+   print("string.rep()", string.rep("c", 4))
+   print("string.rep()", string.rep("a", 0, "|"))
+   print("string.rep()", string.rep("b", 1, "|"))
+   print("string.rep()", string.rep("c", 4, "|"))
+   local _tostring = tostring
+   function tostring(v)
+      if type(v) == "number" then
+         return "(".._tostring(v)..")"
+      else
+         return _tostring(v)
+      end
+   end
+   print("string.format()", string.format("%q", "\"\\\0000\0010\r0\n0\t0\""))
+   print("string.format()", string.format("%12.3fx%%sxx%.6s", 3.1, {}))
+   print("string.format()", string.format("%-3f %%%s %%s", 3.1, true))
+   print("string.format()", string.format("% 3.2g %%d %%%s", 3.1, nil))
+   print("string.format()", string.format("%+3d %%d %%%%%10.6s", 3, io.stdout))
+   print("string.format()", pcall(function()
+      print("string.format()", string.format("%d %%s", {}))
+   end))
+   tostring = _tostring
+end
+
+
+___''
+do
+   print("io.write()", io.type(io.write("hello world\n")))
+   local f = assert(io.tmpfile())
+   print("file:write()", io.type(f:write("hello world\n")))
+   f:close()
+end
+
+
+___''
+do
+   writefile("data.txt", "123 18.8 hello world\ni'm here\n")
+   for a,b in io.lines("test.lua", 2, "*l") do
+      print("io.lines()", a, b)
+      break
+   end
+   for l in io.lines("test.lua") do
+      print("io.lines()", l)
+      break
+   end
+   for n1,n2,rest in io.lines("data.txt", "*n", "*n", "*a") do
+      print("io.lines()", n1, n2, rest)
+   end
+   for l in io.lines("data.txt") do
+      print("io.lines()", l)
+   end
+   print("io.lines()", pcall(function()
+      for l in io.lines("data.txt", "*x") do print(l) end
+   end))
+   print("io.lines()", pcall(function()
+      for l in io.lines("no_such_file.txt") do print(l) end
+   end))
+   local f = assert(io.open("test.lua", "r"))
+   for a,b in f:lines(2, "*l") do
+      print("file:lines()", a, b)
+      break
+   end
+   f:close()
+   f = assert(io.open("data.txt", "r"))
+   for n1,n2,rest in f:lines("*n", "*n", "*a") do
+      print("file:lines()", n1, n2, rest)
+   end
+   f:close()
+   f = assert(io.open("data.txt", "r"))
+   for l in f:lines() do
+      print("file:lines()", l)
+   end
+   f:close()
+   print("file:lines()", pcall(function()
+      for l in f:lines() do print(l) end
+   end))
+   print("file:lines()", pcall(function()
+      local f = assert(io.open("data.txt", "r"))
+      for l in f:lines("*l", "*x") do print(l) end
+      f:close()
+   end))
+   os.remove("data.txt")
+end
+___''
 
 
 print("testing C API ...")

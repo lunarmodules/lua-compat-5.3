@@ -116,6 +116,8 @@ For Lua 5.1 additionally:
 * `luaL_Stream`
 * `LUA_FILEHANDLE`
 * `lua_absindex`
+* `lua_arith`
+* `lua_compare`
 * `lua_len`, `lua_rawlen`, and `luaL_len`
 * `lua_copy`
 * `lua_pushglobaltable`
@@ -141,9 +143,8 @@ For Lua 5.1 additionally:
 * the following C API functions/macros:
   * `lua_isyieldable`
   * `lua_getextraspace`
-  * `lua_arith` (not at all in 5.1, operators missing in 5.2)
+  * `lua_arith` (new operators missing)
   * `lua_pushfstring` (new formats)
-  * `lua_compare` (5.1)
   * `lua_upvalueid` (5.1)
   * `lua_upvaluejoin` (5.1)
   * `lua_version` (5.1)

@@ -40,6 +40,7 @@
 #if defined(LUA_VERSION_NUM) && LUA_VERSION_NUM == 501
 
 /* XXX not implemented:
+ * lua_arith (new operators)
  * lua_upvalueid
  * lua_upvaluejoin
  * lua_version
