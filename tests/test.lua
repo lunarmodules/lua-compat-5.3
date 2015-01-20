@@ -314,6 +314,15 @@ ___''
 print(mod.absindex("hi", true))
 
 ___''
+print(mod.arith(2, 1))
+print(mod.arith(3, 5))
+
+___''
+print(mod.compare(1, 1))
+print(mod.compare(2, 1))
+print(mod.compare(1, 2))
+
+___''
 print(mod.tolstring("string"))
 local t = setmetatable({}, {
   __tostring = function(v) return "mytable" end

@@ -40,8 +40,6 @@
 #if defined(LUA_VERSION_NUM) && LUA_VERSION_NUM == 501
 
 /* XXX not implemented:
- * lua_arith
- * lua_compare
  * lua_upvalueid
  * lua_upvaluejoin
  * lua_version
@@ -63,6 +61,16 @@
 #endif
 
 #define LUA_OK 0
+#define LUA_OPADD 0
+#define LUA_OPSUB 1
+#define LUA_OPMUL 2
+#define LUA_OPDIV 3
+#define LUA_OPMOD 4
+#define LUA_OPPOW 5
+#define LUA_OPUNM 6
+#define LUA_OPEQ 0
+#define LUA_OPLT 1
+#define LUA_OPLE 2
 
 typedef struct luaL_Stream {
   FILE *f;
@@ -73,6 +81,12 @@ typedef size_t lua_Unsigned;
 
 #define lua_absindex COMPAT53_CONCAT(COMPAT53_PREFIX, _absindex)
 COMPAT53_API int lua_absindex (lua_State *L, int i);
+
+#define lua_arith COMPAT53_CONCAT(COMPAT53_PREFIX, _arith)
+COMPAT53_API void lua_arith (lua_State *L, int op);
+
+#define lua_compare COMPAT53_CONCAT(COMPAT53_PREFIX, _compare)
+COMPAT53_API int lua_compare (lua_State *L, int idx1, int idx2, int op);
 
 #define lua_copy COMPAT53_CONCAT(COMPAT53_PREFIX, _copy)
 COMPAT53_API void lua_copy (lua_State *L, int from, int to);

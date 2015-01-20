@@ -96,6 +96,41 @@ static int test_absindex (lua_State *L) {
   return i;
 }
 
+static int test_arith (lua_State *L) {
+  lua_settop(L, 2);
+  lua_pushvalue(L, 1);
+  lua_pushvalue(L, 2);
+  lua_arith(L, LUA_OPADD);
+  lua_pushvalue(L, 1);
+  lua_pushvalue(L, 2);
+  lua_arith(L, LUA_OPSUB);
+  lua_pushvalue(L, 1);
+  lua_pushvalue(L, 2);
+  lua_arith(L, LUA_OPMUL);
+  lua_pushvalue(L, 1);
+  lua_pushvalue(L, 2);
+  lua_arith(L, LUA_OPDIV);
+  lua_pushvalue(L, 1);
+  lua_pushvalue(L, 2);
+  lua_arith(L, LUA_OPMOD);
+  lua_pushvalue(L, 1);
+  lua_pushvalue(L, 2);
+  lua_arith(L, LUA_OPPOW);
+  lua_pushvalue(L, 1);
+  lua_arith(L, LUA_OPUNM);
+  return lua_gettop(L)-2;
+}
+
+static int test_compare (lua_State *L) {
+  luaL_checknumber(L, 1);
+  luaL_checknumber(L, 2);
+  lua_settop(L, 2);
+  lua_pushboolean(L, lua_compare(L, 1, 2, LUA_OPEQ));
+  lua_pushboolean(L, lua_compare(L, 1, 2, LUA_OPLT));
+  lua_pushboolean(L, lua_compare(L, 1, 2, LUA_OPLE));
+  return 3;
+}
+
 static int test_globals (lua_State *L) {
   lua_pushglobaltable(L);
   return 1;
@@ -215,6 +250,8 @@ static const luaL_Reg funcs[] = {
   { "requiref", test_requiref },
   { "getseti", test_getseti },
   { "newproxy", test_newproxy },
+  { "arith", test_arith },
+  { "compare", test_compare },
   { "tonumber", test_tonumber },
   { "tointeger", test_tointeger },
   { "len", test_len },
