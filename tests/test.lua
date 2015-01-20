@@ -26,8 +26,11 @@ do
   end
 end
 
+local V = _VERSION:gsub("^.*(%d+)%.(%d+)$", "%1%2")
+
 print( "testing Lua API ..." )
 package.path = "../?.lua;"..package.path
+package.cpath = "./?-"..V..".so;./?-"..V..".dll;./?.so;./?.dll"
 require("compat53")
 
 ___''

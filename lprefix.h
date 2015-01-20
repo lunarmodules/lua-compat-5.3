@@ -65,6 +65,7 @@ static void compat53_rawseti (lua_State *L, int i, lua_Integer n) {
 #  undef lua_rawseti
 #  define lua_rawseti compat53_rawseti
 #  if LUA_VERSION_NUM == 501
+#    undef lua_compare
 #    define lua_compare(L, a, b, op) lua_lessthan(L, a, b)
 #  endif
 #endif /* ltablib_c */

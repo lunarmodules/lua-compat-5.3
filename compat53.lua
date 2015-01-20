@@ -40,8 +40,9 @@ if lua_version < "5.3" then
    -- load table library
    local table_ok, tablib = pcall(require, "compat53.table")
    if table_ok then
-      table = tablib
-      package.loaded["table"] = tablib
+      for k,v in pairs(tablib) do
+         table[k] = v
+      end
    end
 
 
