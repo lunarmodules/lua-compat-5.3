@@ -46,15 +46,24 @@ if lua_version < "5.3" then
    end
 
 
-   -- use Roberto's struct module for string packing/unpacking for now
-   -- maybe we'll later extract the functions from the 5.3 string
-   -- library for greater compatiblity, but it uses the 5.3 buffer API
-   -- which cannot easily be backported to Lua 5.1.
-   local struct_ok, struct = pcall(require, "struct")
-   if struct_ok then
-      string.pack = struct.pack
-      string.packsize = struct.size
-      string.unpack = struct.unpack
+   -- load string packing functions
+   local str_ok, strlib = pcall(require, "compat53.string")
+   if str_ok then
+      for k,v in pairs(strlib) do
+         string[k] = v
+      end
+   end
+
+
+   -- try Roberto's struct module for string packing/unpacking if
+   -- compat53.string is unavailable
+   if not str_ok then
+      local struct_ok, struct = pcall(require, "struct")
+      if struct_ok then
+         string.pack = struct.pack
+         string.packsize = struct.size
+         string.unpack = struct.unpack
+      end
    end
 
 

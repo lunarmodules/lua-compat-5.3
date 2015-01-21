@@ -54,6 +54,9 @@
 
 #ifdef ltablib_c
 #  define luaopen_table luaopen_compat53_table
+/* lua_rawgeti in compat53.h is implemented as a macro, so the
+ * function signature doesn't match when you use a function pointer
+ */
 static int compat53_rawgeti (lua_State *L, int i, lua_Integer n) {
   return lua_rawgeti(L, i, n);
 }
@@ -64,11 +67,50 @@ static void compat53_rawseti (lua_State *L, int i, lua_Integer n) {
 }
 #  undef lua_rawseti
 #  define lua_rawseti compat53_rawseti
+/* we have lua_compare emulation for Lua 5.1, but it involves calling
+ * Lua code, and the only use in the table library is for '<', so ...
+ */
 #  if LUA_VERSION_NUM == 501
 #    undef lua_compare
 #    define lua_compare(L, a, b, op) lua_lessthan(L, a, b)
 #  endif
 #endif /* ltablib_c */
+
+#ifdef lstrlib_c
+/* move the string library open function out of the way (we only take
+ * the string packing functions)!
+ */
+#  define luaopen_string luaopen_string_XXX
+/* used in string.format implementation, which we don't use: */
+#  ifndef LUA_INTEGER_FRMLEN
+#    define LUA_INTEGER_FRMLEN ""
+#    define LUA_NUMBER_FRMLEN ""
+#  endif
+#  if LUA_VERSION_NUM < 503
+/* lstrlib assumes that lua_Integer and lua_Unsigned have the same
+ * size, so we use the unsigned equivalent of ptrdiff_t! */
+#  define lua_Unsigned size_t
+#  endif
+static int str_pack (lua_State *L);
+static int str_packsize (lua_State *L);
+static int str_unpack (lua_State *L);
+LUAMOD_API int luaopen_compat53_string (lua_State *L) {
+  luaL_Reg const funcs[] = {
+    { "pack", str_pack },
+    { "packsize", str_packsize },
+    { "unpack", str_unpack },
+    { NULL, NULL }
+  };
+  luaL_newlib(L, funcs);
+  return 1;
+}
+/* make luaopen_string(_XXX) static, so it (and all other referenced
+ * string functions) won't be included in the resulting dll
+ * (hopefully).
+ */
+#  undef LUAMOD_API
+#  define LUAMOD_API static
+#endif /* lstrlib.c */
 
 #endif
 
