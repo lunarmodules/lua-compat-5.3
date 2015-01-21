@@ -3,6 +3,7 @@
 
 #include <stddef.h>
 #include <limits.h>
+#include <string.h>
 #include <lua.h>
 #include <lauxlib.h>
 #include <lualib.h>
@@ -45,12 +46,9 @@
  * lua_upvaluejoin
  * lua_version
  * lua_yieldk
- * luaL_buffinitsize
  * luaL_execresult
  * luaL_loadbufferx
  * luaL_loadfilex
- * luaL_prepbuffsize
- * luaL_pushresultsize
  */
 
 /* PUC-Rio Lua uses lconfig_h as include guard for luaconf.h,
@@ -79,6 +77,15 @@ typedef struct luaL_Stream {
 } luaL_Stream;
 
 typedef size_t lua_Unsigned;
+
+typedef struct luaL_Buffer_53 {
+  luaL_Buffer b; /* make incorrect code crash! */
+  char *ptr;
+  size_t nelems;
+  size_t capacity;
+  lua_State *L2;
+} luaL_Buffer_53;
+#define luaL_Buffer luaL_Buffer_53
 
 #define lua_absindex COMPAT53_CONCAT(COMPAT53_PREFIX, _absindex)
 COMPAT53_API int lua_absindex (lua_State *L, int i);
@@ -156,6 +163,46 @@ COMPAT53_API int luaL_fileresult (lua_State *L, int stat, const char *fname);
 #define lua_pcallk(L, na, nr, err, ctx, cont) \
   ((void)(ctx), (void)(cont), lua_pcall(L, na, nr, err))
 
+#define luaL_buffinit COMPAT53_CONCAT(COMPAT53_PREFIX, _buffinit_53)
+COMPAT53_API void luaL_buffinit (lua_State *L, luaL_Buffer_53 *B);
+
+#define luaL_prepbuffsize COMPAT53_CONCAT(COMPAT53_PREFIX, _prepbufsize_53)
+COMPAT53_API char *luaL_prepbuffsize (luaL_Buffer_53 *B, size_t s);
+
+#define luaL_addlstring COMPAT53_CONCAT(COMPAT53_PREFIX, _addlstring_53)
+COMPAT53_API void luaL_addlstring (luaL_Buffer_53 *B, const char *s, size_t l);
+
+#define luaL_addvalue COMPAT53_CONCAT(COMPAT53_PREFIX, _addvalue_53)
+COMPAT53_API void luaL_addvalue (luaL_Buffer_53 *B);
+
+#define luaL_pushresult COMPAT53_CONCAT(COMPAT53_PREFIX, _pushresult_53)
+COMPAT53_API void luaL_pushresult (luaL_Buffer_53 *B);
+
+#undef luaL_buffinitsize
+#define luaL_buffinitsize(L, B, s) \
+  (luaL_buffinit(L, B), luaL_prepbuffsize(B, s))
+
+#undef luaL_prepbuffer
+#define luaL_prepbuffer(B) \
+  luaL_prepbuffsize(B, LUAL_BUFFERSIZE)
+
+#undef luaL_addchar
+#define luaL_addchar(B, c) \
+  ((void)((B)->nelems < (B)->capacity || luaL_prepbuffsize(B, 1)), \
+   ((B)->ptr[(B)->nelems++] = (c)))
+
+#undef luaL_addsize
+#define luaL_addsize(B, s) \
+  ((B)->nelems += (s))
+
+#undef luaL_addstring
+#define luaL_addstring(B, s) \
+  luaL_addlstring(B, s, strlen(s))
+
+#undef luaL_pushresultsize
+#define luaL_pushresultsize(B, s) \
+  (luaL_addsize(B, s), luaL_pushresult(B))
+
 #if defined(LUA_COMPAT_APIINTCASTS)
 #define lua_pushunsigned(L, n) \
   lua_pushinteger(L, (lua_Integer)(n))
@@ -216,7 +263,7 @@ COMPAT53_API size_t lua_stringtonumber (lua_State *L, const char *s);
 #define luaL_getmetafield(L, o, e) \
   (luaL_getmetafield(L, o, e) ? lua_type(L, -1) : LUA_TNIL)
 
-#define luaL_requiref COMPAT53_CONCAT(COMPAT53_PREFIX, L_requiref_)
+#define luaL_requiref COMPAT53_CONCAT(COMPAT53_PREFIX, L_requiref_53)
 COMPAT53_API void luaL_requiref (lua_State *L, const char *modname,
                                  lua_CFunction openf, int glb );
 

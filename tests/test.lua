@@ -679,5 +679,8 @@ local t = setmetatable({}, {
   __tostring = function(v) return nil end
 })
 print(pcall(mod.tolstring, t))
+
+___''
+print(mod.buffer())
 ___''
 

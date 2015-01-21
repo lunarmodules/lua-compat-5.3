@@ -391,6 +391,63 @@ COMPAT53_API int luaL_fileresult (lua_State *L, int stat, const char *fname) {
 #endif /* not COMPAT53_IS_LUAJIT */
 
 
+COMPAT53_API void luaL_buffinit (lua_State *L, luaL_Buffer_53 *B) {
+  /* make it crash if used via pointer to a 5.1-style luaL_Buffer */
+  B->b.p = NULL;
+  B->b.L = NULL;
+  B->b.lvl = 0;
+  /* reuse the buffer from the 5.1-style luaL_Buffer though! */
+  B->ptr = B->b.buffer;
+  B->capacity = LUAL_BUFFERSIZE;
+  B->nelems = 0;
+  B->L2 = L;
+}
+
+
+COMPAT53_API char *luaL_prepbuffsize (luaL_Buffer_53 *B, size_t s) {
+  if (B->capacity - B->nelems < s) { /* needs to grow */
+    char* newptr = NULL;
+    size_t newcap = B->capacity * 2;
+    if (newcap - B->nelems < s)
+      newcap = B->nelems + s;
+    if (newcap < B->capacity) /* overflow */
+      luaL_error(B->L2, "buffer too large");
+    newptr = lua_newuserdata(B->L2, newcap);
+    memcpy(newptr, B->ptr, B->nelems);
+    if (B->ptr != B->b.buffer)
+      lua_replace(B->L2, -2); /* remove old buffer */
+    B->ptr = newptr;
+    B->capacity = newcap;
+  }
+  return B->ptr+B->nelems;
+}
+
+
+COMPAT53_API void luaL_addlstring (luaL_Buffer_53 *B, const char *s, size_t l) {
+  memcpy(luaL_prepbuffsize(B, l), s, l);
+  luaL_addsize(B, l);
+}
+
+
+COMPAT53_API void luaL_addvalue (luaL_Buffer_53 *B) {
+  size_t len = 0;
+  const char *s = lua_tolstring(B->L2, -1, &len);
+  if (!s)
+    luaL_error(B->L2, "cannot convert value to string");
+  if (B->ptr != B->b.buffer)
+    lua_insert(B->L2, -2); /* userdata buffer must be at stack top */
+  luaL_addlstring(B, s, len);
+  lua_remove(B->L2, B->ptr != B->b.buffer ? -2 : -1);
+}
+
+
+void luaL_pushresult (luaL_Buffer_53 *B) {
+  lua_pushlstring(B->L2, B->ptr, B->nelems);
+  if (B->ptr != B->b.buffer)
+    lua_replace(B->L2, -2); /* remove userdata buffer */
+}
+
+
 #endif /* Lua 5.1 */
 
 

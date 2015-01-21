@@ -129,6 +129,7 @@ For Lua 5.1 additionally:
 * `luaL_fileresult`
 * `luaL_checkversion` (with empty body, only to avoid compile errors)
 * `luaL_tolstring`
+* `luaL_buffinitsize`, `luaL_prepbuffsize`, and `luaL_pushresultsize`
 * `lua_pushunsigned`, `lua_tounsignedx`, `lua_tounsigned`,
   `luaL_checkunsigned`, `luaL_optunsigned`, if
   `LUA_COMPAT_APIINTCASTS` is defined.
@@ -149,12 +150,9 @@ For Lua 5.1 additionally:
   * `lua_upvaluejoin` (5.1)
   * `lua_version` (5.1)
   * `lua_yieldk` (5.1)
-  * `luaL_buffinitsize` (5.1)
   * `luaL_execresult` (5.1)
   * `luaL_loadbufferx` (5.1)
   * `luaL_loadfilex` (5.1)
-  * `luaL_prepbuffsize` (5.1)
-  * `luaL_pushresultsize` (5.1)
 
 ## See also
 
