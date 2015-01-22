@@ -293,7 +293,7 @@ COMPAT53_API void luaL_requiref (lua_State *L, const char *modname,
 #define LUA_KFUNCTION(_name) \
   static int (_name)(lua_State *L, int status, lua_KContext ctx); \
   static int (_name ## _52)(lua_State *L) { \
-    luaK_Context ctx; \
+    lua_KContext ctx; \
     int status = lua_getctx(L, &ctx); \
     return (_name)(L, status, ctx); \
   } \
