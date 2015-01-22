@@ -142,6 +142,8 @@ For Lua 5.1 additionally:
 
 * bit operators
 * integer division operator
+* utf8 escape sequences
+* 64 bit integers
 * `coroutine.isyieldable`
 * Lua 5.1: `_ENV`, `goto`, labels, ephemeron tables, etc. See
   [`lua-compat-5.2`][2] for a detailed list.
@@ -149,7 +151,7 @@ For Lua 5.1 additionally:
   * `lua_isyieldable`
   * `lua_getextraspace`
   * `lua_arith` (new operators missing)
-  * `lua_pushfstring` (new formats missing)
+  * `lua_push(v)fstring` (new formats missing)
   * `lua_upvalueid` (5.1)
   * `lua_upvaluejoin` (5.1)
   * `lua_version` (5.1)
@@ -157,6 +159,41 @@ For Lua 5.1 additionally:
   * `luaL_execresult` (5.1)
   * `luaL_loadbufferx` (5.1)
   * `luaL_loadfilex` (5.1)
+
+### Yieldable C functions
+
+The emulation of `lua_(p)callk` for previous Lua versions is not 100%
+perfect, because the continuation functions in Lua 5.2 have different
+signatures than the ones in Lua 5.3 (and Lua 5.1 doesn't have
+continuation functions at all). But with the help of a small macro the
+same code can be used for all three Lua versions (the 5.1 version
+won't support yielding though).
+
+Original Lua 5.3 code (example adapted from the Lua 5.3 manual):
+
+```C
+static int k (lua_State *L, int status, lua_KContext ctx) {
+  ...  /* code 2 */
+}
+
+int original_function (lua_State *L) {
+  ...     /* code 1 */
+  return k(L, lua_pcallk(L, n, m, h, ctx2, k), ctx1);
+}
+```
+
+Portable version:
+
+```C
+LUA_KFUNCTION( k ) {
+  ...  /* code 2; parameters L, status, and ctx available here */
+}
+
+int original_function (lua_State *L) {
+  ...     /* code 1 */
+  return k(L, lua_pcallk(L, n, m, h, ctx2, k), ctx1);
+}
+```
 
 ## See also
 
