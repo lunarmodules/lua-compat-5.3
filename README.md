@@ -14,7 +14,8 @@ It includes:
 
 * _For writing Lua_: The Lua module `compat53`, which can be require'd
   from Lua scripts and run in Lua 5.1, 5.2, and 5.3, including a
-  backport of the `utf8` module straight from the Lua 5.3 sources.
+  backport of the `utf8` module, the 5.3 `table` module, and the
+  string packing functions straight from the Lua 5.3 sources.
 * _For writing C_: A C header and file which can be linked to your
   Lua module written in C, providing some functions from the C API
   of Lua 5.3 that do not exist in Lua 5.2 or 5.1, making it easier to
@@ -36,8 +37,10 @@ When run under Lua 5.3, this module does nothing.
 
 When run under Lua 5.2 or 5.1, it replaces some of your standard
 functions and adds new ones to bring your environment closer to that
-of Lua 5.3. It also loads the backported `utf8` module automatically,
-and tries to use [Roberto's struct library][1].
+of Lua 5.3. It also tries to load the backported `utf8`, `table`, and
+string packing modules automatically. If unsuccessful, pure Lua
+versions of the new `table` functions are used as a fallback, and
+[Roberto's struct library][1] is tried for string packing.
 
 ### C code
 
@@ -60,9 +63,9 @@ your project:
 ### Lua
 
 * the `utf8` module backported from the Lua 5.3 sources
-* `string.pack`, `string.packsize`, and `string.unpack` if the
-  `struct` module is available. (`struct` is not 100% compatible
-  to Lua 5.3's string packing!)
+* `string.pack`, `string.packsize`, and `string.unpack` from the Lua
+  5.3 sources or from the `struct` module. (`struct` is not 100%
+  compatible to Lua 5.3's string packing!)
 * `math.maxinteger` and `math.mininteger`, `math.tointeger`, `math.type`,
   and `math.ult`
 * `ipairs` respects `__index` metamethod
@@ -112,6 +115,7 @@ For Lua 5.1 additionally:
 
 For Lua 5.1 additionally:
 * `LUA_OK`
+* `LUA_OP*` macros for `lua_arith` and `lua_compare`
 * `lua_Unsigned`
 * `luaL_Stream`
 * `LUA_FILEHANDLE`
@@ -145,7 +149,7 @@ For Lua 5.1 additionally:
   * `lua_isyieldable`
   * `lua_getextraspace`
   * `lua_arith` (new operators missing)
-  * `lua_pushfstring` (new formats)
+  * `lua_pushfstring` (new formats missing)
   * `lua_upvalueid` (5.1)
   * `lua_upvaluejoin` (5.1)
   * `lua_version` (5.1)
