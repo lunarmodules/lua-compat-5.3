@@ -48,8 +48,37 @@
 #undef LUAMOD_API
 #define LUAMOD_API extern
 
-#ifndef luaopen_utf8
+#ifdef lutf8lib_c
 #  define luaopen_utf8 luaopen_compat53_utf8
+#  include <stdarg.h>
+/* we don't support the %U format string of lua_pushfstring!
+ * code below adapted from the Lua 5.3 sources:
+ */
+static const char *compat53_utf8_escape (lua_State* L, ...) {
+  long x = 0;
+  va_list argp;
+  va_start(argp, L);
+  x = (long)va_arg(argp, long);
+  va_end(argp);
+  if (x < 0x80) { /* ASCII */
+    char c = (char)x;
+    lua_pushlstring(L, &c, 1);
+  } else {
+    char buff[8] = { 0 };
+    unsigned int mfb = 0x3f;
+    int n = 1;
+    do {
+      buff[8 - (n++)] = (char)(0x80|(x & 0x3f));
+      x >>= 6;
+      mfb >>= 1;
+    } while (x > mfb);
+    buff[8-n] = (char)((~mfb << 1) | x);
+    lua_pushlstring(L, buff+8-n, n);
+  }
+  return lua_tostring(L, -1);
+}
+#  define lua_pushfstring(L, fmt, l) \
+  compat53_utf8_escape(L, l)
 #endif
 
 #ifdef ltablib_c
