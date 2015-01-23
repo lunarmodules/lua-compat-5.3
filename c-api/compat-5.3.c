@@ -24,6 +24,21 @@ COMPAT53_API int lua_absindex (lua_State *L, int i) {
 }
 
 
+static void compat53_call_lua (lua_State *L, char const code[], size_t len,
+                               int nargs, int nret) {
+  lua_rawgetp(L, LUA_REGISTRYINDEX, (void*)code);
+  if (lua_type(L, -1) != LUA_TFUNCTION) {
+    lua_pop(L, 1);
+    if (luaL_loadbuffer(L, code, len, "=none"))
+      lua_error(L);
+    lua_pushvalue(L, -1);
+    lua_rawsetp(L, LUA_REGISTRYINDEX, (void*)code);
+  }
+  lua_insert(L, -nargs-1);
+  lua_call(L, nargs, nret);
+}
+
+
 static const char compat53_arith_code[] = {
   'l', 'o', 'c', 'a', 'l', ' ', 'o', 'p', ',', 'a', ',', 'b',
   '=', '.', '.', '.', '\n',
@@ -52,65 +67,46 @@ static const char compat53_arith_code[] = {
 };
 
 COMPAT53_API void lua_arith (lua_State *L, int op) {
+  if( op < LUA_OPADD && op > LUA_OPUNM )
+    luaL_error(L, "invalid 'op' argument for lua_arith");
   luaL_checkstack(L, 5, "not enough stack slots");
   if (op == LUA_OPUNM)
     lua_pushvalue(L, -1);
-  lua_rawgetp(L, LUA_REGISTRYINDEX, (void*)compat53_arith_code);
-  if (lua_type(L, -1) != LUA_TFUNCTION) {
-    lua_pop(L, 1);
-    if (luaL_loadbuffer(L, compat53_arith_code,
-                        sizeof(compat53_arith_code)-1, "=none"))
-      lua_error(L);
-    lua_pushvalue(L, -1);
-    lua_rawsetp(L, LUA_REGISTRYINDEX, (void*)compat53_arith_code);
-  }
   lua_pushnumber(L, op);
-  lua_pushvalue(L, -4);
-  lua_pushvalue(L, -4);
-  lua_call(L, 3, 1);
-  lua_replace(L, -3); /* replace first operand */
-  lua_pop(L, 1); /* pop second */
+  lua_insert(L, -3);
+  compat53_call_lua(L, compat53_arith_code,
+                    sizeof(compat53_arith_code)-1, 3, 1);
 }
 
 
 static const char compat53_compare_code[] = {
-  'l', 'o', 'c', 'a', 'l', ' ', 'o', 'p', ',', 'a', ',', 'b',
+  'l', 'o', 'c', 'a', 'l', ' ', 'a', ',', 'b',
   '=', '.', '.', '.', '\n',
-  'i', 'f', ' ', 'o', 'p', '=', '=', '0', ' ',
-  't', 'h', 'e', 'n', '\n',
-  'r', 'e', 't', 'u', 'r', 'n', ' ', 'a', '=', '=', 'b', '\n',
-  'e', 'l', 's', 'e', 'i', 'f', ' ', 'o', 'p', '=', '=', '1', ' ',
-  't', 'h', 'e', 'n', '\n',
-  'r', 'e', 't', 'u', 'r', 'n', ' ', 'a', '<', 'b', '\n',
-  'e', 'l', 's', 'e', 'i', 'f', ' ', 'o', 'p', '=', '=', '2', ' ',
-  't', 'h', 'e', 'n', '\n',
-  'r', 'e', 't', 'u', 'r', 'n', ' ', 'a', '<', '=', 'b', '\n',
-  'e', 'n', 'd', '\n', '\0'
+  'r', 'e', 't', 'u', 'r', 'n', ' ', 'a', '<', '=', 'b', '\n', '\0'
 };
 
 COMPAT53_API int lua_compare (lua_State *L, int idx1, int idx2, int op) {
   int result = 0;
-  luaL_checkstack(L, 4, "not enough stack slots");
-  idx1 = lua_absindex(L, idx1);
-  idx2 = lua_absindex(L, idx2);
-  lua_rawgetp(L, LUA_REGISTRYINDEX, (void*)compat53_compare_code);
-  if (lua_type(L, -1) != LUA_TFUNCTION) {
-    lua_pop(L, 1);
-    if (luaL_loadbuffer(L, compat53_compare_code,
-                        sizeof(compat53_compare_code)-1, "=none"))
-      lua_error(L);
-    lua_pushvalue(L, -1);
-    lua_rawsetp(L, LUA_REGISTRYINDEX, (void*)compat53_compare_code);
+  switch (op) {
+    case LUA_OPEQ:
+      return lua_equal(L, idx1, idx2);
+    case LUA_OPLT:
+      return lua_lessthan(L, idx1, idx2);
+    case LUA_OPLE:
+      luaL_checkstack(L, 4, "not enough stack slots");
+      idx1 = lua_absindex(L, idx1);
+      idx2 = lua_absindex(L, idx2);
+      lua_pushvalue(L, idx1);
+      lua_pushvalue(L, idx2);
+      compat53_call_lua(L, (void*)compat53_compare_code,
+                        sizeof(compat53_compare_code)-1, 2, 1);
+      result = lua_toboolean(L, -1);
+      lua_pop(L, 1);
+      return result;
+    default:
+      luaL_error(L, "invalid 'op' argument for lua_compare");
   }
-  lua_pushnumber(L, op);
-  lua_pushvalue(L, idx1);
-  lua_pushvalue(L, idx2);
-  lua_call(L, 3, 1);
-  if(lua_type(L, -1) != LUA_TBOOLEAN)
-    luaL_error(L, "invalid 'op' argument for lua_compare");
-  result = lua_toboolean(L, -1);
-  lua_pop(L, 1);
-  return result;
+  return 0;
 }
 
 

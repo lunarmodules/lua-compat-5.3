@@ -96,13 +96,6 @@ static void compat53_rawseti (lua_State *L, int i, lua_Integer n) {
 }
 #  undef lua_rawseti
 #  define lua_rawseti compat53_rawseti
-/* we have lua_compare emulation for Lua 5.1, but it involves calling
- * Lua code, and the only use in the table library is for '<', so ...
- */
-#  if LUA_VERSION_NUM == 501
-#    undef lua_compare
-#    define lua_compare(L, a, b, op) lua_lessthan(L, a, b)
-#  endif
 #endif /* ltablib_c */
 
 #ifdef lstrlib_c
