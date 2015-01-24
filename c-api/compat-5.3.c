@@ -67,7 +67,7 @@ static const char compat53_arith_code[] = {
 };
 
 COMPAT53_API void lua_arith (lua_State *L, int op) {
-  if( op < LUA_OPADD && op > LUA_OPUNM )
+  if (op < LUA_OPADD && op > LUA_OPUNM)
     luaL_error(L, "invalid 'op' argument for lua_arith");
   luaL_checkstack(L, 5, "not enough stack slots");
   if (op == LUA_OPUNM)
@@ -80,8 +80,7 @@ COMPAT53_API void lua_arith (lua_State *L, int op) {
 
 
 static const char compat53_compare_code[] = {
-  'l', 'o', 'c', 'a', 'l', ' ', 'a', ',', 'b',
-  '=', '.', '.', '.', '\n',
+  'l', 'o', 'c', 'a', 'l', ' ', 'a', ',', 'b', '=', '.', '.', '.', '\n',
   'r', 'e', 't', 'u', 'r', 'n', ' ', 'a', '<', '=', 'b', '\n', '\0'
 };
 
@@ -93,7 +92,7 @@ COMPAT53_API int lua_compare (lua_State *L, int idx1, int idx2, int op) {
     case LUA_OPLT:
       return lua_lessthan(L, idx1, idx2);
     case LUA_OPLE:
-      luaL_checkstack(L, 4, "not enough stack slots");
+      luaL_checkstack(L, 5, "not enough stack slots");
       idx1 = lua_absindex(L, idx1);
       idx2 = lua_absindex(L, idx2);
       lua_pushvalue(L, idx1);
