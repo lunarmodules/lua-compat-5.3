@@ -73,6 +73,13 @@
 
 typedef struct luaL_Stream {
   FILE *f;
+  /* The following field is for LuaJIT which adds a uint32_t field
+   * to file handles. */
+#if INT_MAX > 2147483640L
+  unsigned int type;
+#else
+  unsigned long type;
+#endif
   lua_CFunction closef;
 } luaL_Stream;
 
