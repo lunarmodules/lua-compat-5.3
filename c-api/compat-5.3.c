@@ -97,7 +97,7 @@ COMPAT53_API int lua_compare (lua_State *L, int idx1, int idx2, int op) {
       idx2 = lua_absindex(L, idx2);
       lua_pushvalue(L, idx1);
       lua_pushvalue(L, idx2);
-      compat53_call_lua(L, (void*)compat53_compare_code,
+      compat53_call_lua(L, compat53_compare_code,
                         sizeof(compat53_compare_code)-1, 2, 1);
       result = lua_toboolean(L, -1);
       lua_pop(L, 1);
