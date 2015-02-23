@@ -697,13 +697,14 @@ if lua_version < "5.3" then
             return pcall_exec(current, pcall_coroutine(func), ...)
          end
 
+         local _tostring = tostring
          local function xpcall_catch(current, call, msgh, success, ...)
             if not success then
                xpcall_running[current] = call
                local ok, result = _pcall(msgh, ...)
                xpcall_running[current] = nil
                if not ok then
-                  return false, "error in error handling ("..tostring(result)..")"
+                  return false, "error in error handling (".._tostring(result)..")"
                end
                return false, result
             end
@@ -735,6 +736,7 @@ if lua_version < "5.3" then
       end
 
 
+      local package = package
       if not is_luajit then
          local io_open = io.open
          local table_concat = table.concat
