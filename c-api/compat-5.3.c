@@ -510,7 +510,7 @@ COMPAT53_API size_t lua_stringtonumber (lua_State *L, const char *s) {
 COMPAT53_API void luaL_requiref (lua_State *L, const char *modname,
                                  lua_CFunction openf, int glb) {
   luaL_checkstack(L, 3, "not enough stack slots available");
-  lua_getfield(L, LUA_REGISTRYINDEX, "_LOADED");
+  luaL_getsubtable(L, LUA_REGISTRYINDEX, "_LOADED");
   if (lua_getfield(L, -1, modname) == LUA_TNIL) {
     lua_pop(L, 1);
     lua_pushcfunction(L, openf);
