@@ -117,8 +117,6 @@ For Lua 5.1 additionally:
 * `LUA_OK`
 * `LUA_OP*` macros for `lua_arith` and `lua_compare`
 * `lua_Unsigned`
-* `luaL_Stream`
-* `LUA_FILEHANDLE`
 * `lua_absindex`
 * `lua_arith`
 * `lua_compare`

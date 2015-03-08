@@ -6,7 +6,6 @@
 #include <string.h>
 #include <lua.h>
 #include <lauxlib.h>
-#include <lualib.h>
 
 
 #if defined(COMPAT53_PREFIX)
@@ -70,18 +69,6 @@
 #define LUA_OPEQ 0
 #define LUA_OPLT 1
 #define LUA_OPLE 2
-
-typedef struct luaL_Stream {
-  FILE *f;
-  /* The following field is for LuaJIT which adds a uint32_t field
-   * to file handles. */
-#if INT_MAX > 2147483640L
-  unsigned int type;
-#else
-  unsigned long type;
-#endif
-  lua_CFunction closef;
-} luaL_Stream;
 
 typedef size_t lua_Unsigned;
 
