@@ -42,6 +42,31 @@ string packing modules automatically. If unsuccessful, pure Lua
 versions of the new `table` functions are used as a fallback, and
 [Roberto's struct library][1] is tried for string packing.
 
+#### Lua submodules
+
+```lua
+local compat53 = require("compat53.base")
+```
+
+This loads the compatibility functions and returns them in a table
+without modifying the global environment. The returned table has a
+metatable set so that lookup of unmodified global functions should
+work as well. Some features (e.g. file methods) of `compat53` only
+take effect when applied to the global environment though, and groups
+of functions might be interdependent and should not be mixed with old
+versions of those functions. (I.e. it is recommended to use plain
+`require("compat53")` when possible!)
+
+```lua
+require("compat53.module")
+```
+
+This looks in the call stack for the closest "main" chunk (module or
+script) and replaces its environment so that you can transparently use
+the compatibility functions in this file alone without affecting other
+files. The same gotchas as for `"compat53.base"` apply. Additionally
+this relies on the availability of `debug` functions.
+
 ### C code
 
 There are two ways of adding the C API compatibility functions/macros to
@@ -67,7 +92,7 @@ your project:
   5.3 sources or from the `struct` module. (`struct` is not 100%
   compatible to Lua 5.3's string packing!) (See [here][4])
 * `math.maxinteger` and `math.mininteger`, `math.tointeger`, `math.type`,
-  and `math.ult` (See [here][5]
+  and `math.ult` (see [here][5])
 * `ipairs` respects `__index` metamethod
 * `table.move`
 * `table` library respects metamethods
