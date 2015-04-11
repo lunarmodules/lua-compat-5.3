@@ -1,8 +1,28 @@
+local _G, _VERSION, setmetatable = _G, _VERSION, setmetatable
 local lua_version = _VERSION:sub(-3)
 
+
+local M = {}
+local M_meta = {
+   __index = _G
+}
+setmetatable(M, M_meta)
+
+
 if lua_version < "5.3" then
-   -- local aliases for commonly used functions
-   local type, select, error = type, select, error
+
+   -- cache globals in upvalues
+   local error, getmetatable, ipairs, pairs, pcall, require, select, type =
+         error, getmetatable, ipairs, pairs, pcall, require, select, type
+   local debug, math, package, string, table =
+         debug, math, package, string, table
+
+   -- create subtables
+   M.math = setmetatable({}, { __index = math })
+   M.string = setmetatable({}, { __index = string })
+   M.table = setmetatable({}, { __index = table })
+   M.utf8 = {}
+
 
    -- select the most powerful getmetatable function available
    local gmt = type(debug) == "table" and debug.getmetatable or
@@ -29,11 +49,13 @@ if lua_version < "5.3" then
    -- load utf8 library
    local utf8_ok, utf8lib = pcall(require, "compat53.utf8")
    if utf8_ok then
-      utf8 = utf8lib
-      package.loaded["utf8"] = utf8lib
       if lua_version == "5.1" then
          utf8lib.charpattern = "[%z\1-\127\194-\244][\128-\191]*"
       end
+      for k,v in pairs(utf8lib) do
+         M.utf8[k] = v
+      end
+      package.loaded["utf8"] = M.utf8
    end
 
 
@@ -41,7 +63,7 @@ if lua_version < "5.3" then
    local table_ok, tablib = pcall(require, "compat53.table")
    if table_ok then
       for k,v in pairs(tablib) do
-         table[k] = v
+         M.table[k] = v
       end
    end
 
@@ -50,7 +72,7 @@ if lua_version < "5.3" then
    local str_ok, strlib = pcall(require, "compat53.string")
    if str_ok then
       for k,v in pairs(strlib) do
-         string[k] = v
+         M.string[k] = v
       end
    end
 
@@ -60,9 +82,9 @@ if lua_version < "5.3" then
    if not str_ok then
       local struct_ok, struct = pcall(require, "struct")
       if struct_ok then
-         string.pack = struct.pack
-         string.packsize = struct.size
-         string.unpack = struct.unpack
+         M.string.pack = struct.pack
+         M.string.packsize = struct.size
+         M.string.unpack = struct.unpack
       end
    end
 
@@ -81,17 +103,17 @@ if lua_version < "5.3" then
          maxint = maxint
          minint = -maxint
       end
-      math.maxinteger = maxint
-      math.mininteger = minint
+      M.math.maxinteger = maxint
+      M.math.mininteger = minint
 
-      function math.tointeger(n)
+      function M.math.tointeger(n)
          if type(n) == "number" and n <= maxint and n >= minint and n % 1 == 0 then
             return n
          end
          return nil
       end
 
-      function math.type(n)
+      function M.math.type(n)
          if type(n) == "number" then
             if n <= maxint and n >= minint and n % 1 == 0 then
                return "integer"
@@ -116,7 +138,7 @@ if lua_version < "5.3" then
          end
       end
 
-      function math.ult(m, n)
+      function M.math.ult(m, n)
          m = checkinteger(m, "1", "math.ult")
          n = checkinteger(n, "2", "math.ult")
          if m >= 0 and n < 0 then
@@ -132,7 +154,6 @@ if lua_version < "5.3" then
 
    -- ipairs should respect __index metamethod
    do
-      local _ipairs = ipairs
       local function ipairs_iterator(st, var)
          var = var + 1
          local val = st[var]
@@ -140,11 +161,11 @@ if lua_version < "5.3" then
             return var, st[var]
          end
       end
-      function ipairs(t)
+      function M.ipairs(t)
          if gmt(t) ~= nil then -- t has metatable
             return ipairs_iterator, t, 0
          else
-            return _ipairs(t)
+            return ipairs(t)
          end
       end
    end
@@ -153,7 +174,12 @@ if lua_version < "5.3" then
    -- update table library (if C module not available)
    if not table_ok then
       local table_concat = table.concat
-      function table.concat(list, sep, i, j)
+      local table_insert = table.insert
+      local table_remove = table.remove
+      local table_sort = table.sort
+      local table_unpack = lua_version == "5.1" and unpack or table.unpack
+
+      function M.table.concat(list, sep, i, j)
          local mt = gmt(list)
          if type(mt) == "table" and type(mt.__len) == "function" then
             local src = list
@@ -165,8 +191,7 @@ if lua_version < "5.3" then
          return table_concat(list, sep, i, j)
       end
 
-      local table_insert = table.insert
-      function table.insert(list, ...)
+      function M.table.insert(list, ...)
          local mt = gmt(list)
          local has_mt = type(mt) == "table"
          local has_len = has_mt and type(mt.__len) == "function"
@@ -191,7 +216,7 @@ if lua_version < "5.3" then
          end
       end
 
-      function table.move(a1, f, e, t, a2)
+      function M.table.move(a1, f, e, t, a2)
          a2 = a2 or a1
          f = checkinteger(f, "2", "table.move")
          argcheck(f > 0, "2", "table.move",
@@ -208,8 +233,7 @@ if lua_version < "5.3" then
          return a2
       end
 
-      local table_remove = table.remove
-      function table.remove(list, pos)
+      function M.table.remove(list, pos)
          local mt = gmt(list)
          local has_mt = type(mt) == "table"
          local has_len = has_mt and type(mt.__len) == "function"
@@ -282,8 +306,7 @@ if lua_version < "5.3" then
             end
          end
 
-         local table_sort = table.sort
-         function table.sort(list, cmp)
+         function M.table.sort(list, cmp)
             local mt = gmt(list)
             local has_mt = type(mt) == "table"
             local has_len = has_mt and type(mt.__len) == "function"
@@ -297,7 +320,6 @@ if lua_version < "5.3" then
          end
       end
 
-      local table_unpack = lua_version == "5.1" and unpack or table.unpack
       local function unpack_helper(list, i, j, ...)
          if j < i then
             return ...
@@ -305,7 +327,7 @@ if lua_version < "5.3" then
             return unpack_helper(list, i, j-1, list[j], ...)
          end
       end
-      function table.unpack(list, i, j)
+      function M.table.unpack(list, i, j)
          local mt = gmt(list)
          local has_mt = type(mt) == "table"
          local has_len = has_mt and type(mt.__len) == "function"
@@ -319,13 +341,41 @@ if lua_version < "5.3" then
    end -- update table library
 
 
-
    -- bring Lua 5.1 (and LuaJIT) up to speed with Lua 5.2
    if lua_version == "5.1" then
       -- detect LuaJIT (including LUAJIT_ENABLE_LUA52COMPAT compilation flag)
       local is_luajit = (string.dump(function() end) or ""):sub(1, 3) == "\027LJ"
       local is_luajit52 = is_luajit and
         #setmetatable({}, { __len = function() return 1 end }) == 1
+
+      -- cache globals in upvalues
+      local load, loadfile, loadstring, setfenv, tostring, unpack, xpcall =
+            load, loadfile, loadstring, setfenv, tostring, unpack, xpcall
+      local coroutine, io, os = coroutine, io, os
+      local coroutine_create = coroutine.create
+      local coroutine_resume = coroutine.resume
+      local coroutine_running = coroutine.running
+      local coroutine_status = coroutine.status
+      local coroutine_yield = coroutine.yield
+      local io_input = io.input
+      local io_open = io.open
+      local io_output = io.output
+      local io_write = io.write
+      local math_log = math.log
+      local os_execute = os.execute
+      local string_find = string.find
+      local string_format = string.format
+      local string_gmatch = string.gmatch
+      local string_gsub = string.gsub
+      local string_match = string.match
+      local string_rep = string.rep
+      local table_concat = table.concat
+
+      -- create subtables
+      M.coroutine = setmetatable({}, { __index = coroutine })
+      M.io = setmetatable({}, { __index = io })
+      M.os = setmetatable({}, { __index = os })
+      M.package = setmetatable({}, { __index = package })
 
 
       -- table that maps each running coroutine to the coroutine that resumed it
@@ -334,15 +384,19 @@ if lua_version < "5.3" then
       local pcall_previous = {}
       local pcall_callOf = {}
       local xpcall_running = {}
-      local coroutine_running = coroutine.running
 
       -- handle debug functions
       if type(debug) == "table" then
+         local debug_setfenv = debug.setfenv
+         local debug_getfenv = debug.getfenv
+         local debug_setmetatable = debug.setmetatable
+         local debug_getinfo = debug.getinfo
+         local debug_traceback = debug.traceback
+
+         M.debug = setmetatable({}, { __index = debug })
 
          if not is_luajit52 then
-            local _G, package = _G, package
-            local debug_setfenv = debug.setfenv
-            function debug.setuservalue(obj, value)
+            function M.debug.setuservalue(obj, value)
                if type(obj) ~= "userdata" then
                   error("bad argument #1 to 'setuservalue' (userdata expected, got "..
                         type(obj)..")", 2)
@@ -355,8 +409,7 @@ if lua_version < "5.3" then
                return debug_setfenv(obj, value)
             end
 
-            local debug_getfenv = debug.getfenv
-            function debug.getuservalue(obj)
+            function M.debug.getuservalue(obj)
                if type(obj) ~= "userdata" then
                   return nil
                else
@@ -368,15 +421,13 @@ if lua_version < "5.3" then
                end
             end
 
-            local debug_setmetatable = debug.setmetatable
-            function debug.setmetatable(value, tab)
+            function M.debug.setmetatable(value, tab)
                debug_setmetatable(value, tab)
                return value
             end
          end -- not luajit with compat52 enabled
 
          if not is_luajit then
-            local debug_getinfo = debug.getinfo
             local function calculate_trace_level(co, level)
                if level ~= nil then
                   for out = 1, 1/0 do
@@ -395,8 +446,7 @@ if lua_version < "5.3" then
 
             local stack_pattern = "\nstack traceback:"
             local stack_replace = ""
-            local debug_traceback = debug.traceback
-            function debug.traceback(co, msg, level)
+            function M.debug.traceback(co, msg, level)
                local lvl
                local nilmsg
                if type(co) ~= "thread" then
@@ -471,13 +521,12 @@ if lua_version < "5.3" then
 
 
       if not is_luajit52 then
-         local _pairs = pairs
-         function pairs(t)
+         function M.pairs(t)
             local mt = gmt(t)
             if type(mt) == "table" and type(mt.__pairs) == "function" then
                return mt.__pairs(t)
             else
-               return _pairs(t)
+               return pairs(t)
             end
          end
       end
@@ -497,9 +546,7 @@ if lua_version < "5.3" then
             end
          end
 
-         local setfenv = setfenv
-         local _load, _loadstring = load, loadstring
-         function load(ld, source, mode, env)
+         function M.load(ld, source, mode, env)
             mode = mode or "bt"
             local chunk, msg
             if type( ld ) == "string" then
@@ -507,7 +554,7 @@ if lua_version < "5.3" then
                   local merr = check_mode(mode, ld)
                   if merr then return nil, merr end
                end
-               chunk, msg = _loadstring(ld, source)
+               chunk, msg = loadstring(ld, source)
             else
                local ld_type = type(ld)
                if ld_type ~= "function" then
@@ -527,10 +574,10 @@ if lua_version < "5.3" then
                         return v
                      end
                   end
-                  chunk, msg = _load(checked_ld, source)
+                  chunk, msg = load(checked_ld, source)
                   if merr then return nil, merr end
                else
-                  chunk, msg = _load(ld, source)
+                  chunk, msg = load(ld, source)
                end
             end
             if not chunk then
@@ -542,11 +589,9 @@ if lua_version < "5.3" then
             return chunk
          end
 
-         loadstring = load
+         M.loadstring = load
 
-         local _loadfile = loadfile
-         local io_open = io.open
-         function loadfile(file, mode, env)
+         function M.loadfile(file, mode, env)
             mode = mode or "bt"
             if mode ~= "bt" then
                local f = io_open(file, "rb")
@@ -559,7 +604,7 @@ if lua_version < "5.3" then
                   end
                end
             end
-            local chunk, msg = _loadfile(file)
+            local chunk, msg = loadfile(file)
             if not chunk then
                return chunk, msg
             end
@@ -572,7 +617,7 @@ if lua_version < "5.3" then
 
 
       if not is_luajit52 then
-         function rawlen(v)
+         function M.rawlen(v)
             local t = type(v)
             if t ~= "string" and t ~= "table" then
                error("bad argument #1 to 'rawlen' (table or string expected)", 2)
@@ -583,32 +628,29 @@ if lua_version < "5.3" then
 
 
       if not is_luajit52 then
-         local os_execute = os.execute
-         function os.execute(cmd)
+         function M.os.execute(cmd)
             local code = os_execute(cmd)
             -- Lua 5.1 does not report exit by signal.
             if code == 0 then
                return true, "exit", code
             else
-               return nil, "exit", code/256 -- only correct on POSIX!
+               return nil, "exit", code/256 -- only correct on Linux!
             end
          end
       end
 
 
       if not table_ok and not is_luajit52 then
-         table.pack = function(...)
+         M.table.pack = function(...)
             return { n = select('#', ...), ... }
          end
       end
 
 
-      local main_coroutine = coroutine.create(function() end)
+      local main_coroutine = coroutine_create(function() end)
 
-      local _pcall = pcall
-      local coroutine_create = coroutine.create
-      function coroutine.create(func)
-         local success, result = _pcall(coroutine_create, func)
+      function M.coroutine.create(func)
+         local success, result = pcall(coroutine_create, func)
          if not success then
             if type(func) ~= "function" then
                error("bad argument #1 (function expected)", 0)
@@ -621,7 +663,7 @@ if lua_version < "5.3" then
       local pcall_mainOf = {}
 
       if not is_luajit52 then
-         function coroutine.running()
+         function M.coroutine.running()
             local co = coroutine_running()
             if co then
                return pcall_mainOf[co] or co, false
@@ -631,8 +673,7 @@ if lua_version < "5.3" then
          end
       end
 
-      local coroutine_yield = coroutine.yield
-      function coroutine.yield(...)
+      function M.coroutine.yield(...)
          local co, flag = coroutine_running()
          if co and not flag then
             return coroutine_yield(...)
@@ -642,8 +683,7 @@ if lua_version < "5.3" then
       end
 
       if not is_luajit then
-         local coroutine_resume = coroutine.resume
-         function coroutine.resume(co, ...)
+         function M.coroutine.resume(co, ...)
             if co == main_coroutine then
                return false, "cannot resume non-suspended coroutine"
             else
@@ -651,8 +691,7 @@ if lua_version < "5.3" then
             end
          end
 
-         local coroutine_status = coroutine.status
-         function coroutine.status(co)
+         function M.coroutine.status(co)
             local notmain = coroutine_running()
             if co == main_coroutine then
                return notmain and "normal" or "running"
@@ -683,7 +722,7 @@ if lua_version < "5.3" then
             end
             return pcall_results(current, call, coroutine_resume(call, ...))
          end
-         local coroutine_create52 = coroutine.create
+         local coroutine_create52 = M.coroutine.create
          local function pcall_coroutine(func)
             if type(func) ~= "function" then
                local callable = func
@@ -691,32 +730,29 @@ if lua_version < "5.3" then
             end
             return coroutine_create52(func)
          end
-         function pcall(func, ...)
+         function M.pcall(func, ...)
             local current = coroutine_running()
-            if not current then return _pcall(func, ...) end
+            if not current then return pcall(func, ...) end
             return pcall_exec(current, pcall_coroutine(func), ...)
          end
 
-         local _tostring = tostring
          local function xpcall_catch(current, call, msgh, success, ...)
             if not success then
                xpcall_running[current] = call
-               local ok, result = _pcall(msgh, ...)
+               local ok, result = pcall(msgh, ...)
                xpcall_running[current] = nil
                if not ok then
-                  return false, "error in error handling (".._tostring(result)..")"
+                  return false, "error in error handling ("..tostring(result)..")"
                end
                return false, result
             end
             return true, ...
          end
-         local _xpcall = xpcall
-         local _unpack = unpack
-         function xpcall(f, msgh, ...)
+         function M.xpcall(f, msgh, ...)
             local current = coroutine_running()
             if not current then
                local args, n = { ... }, select('#', ...)
-               return _xpcall(function() return f(_unpack(args, 1, n)) end, msgh)
+               return xpcall(function() return f(unpack(args, 1, n)) end, msgh)
             end
             local call = pcall_coroutine(f)
             return xpcall_catch(current, call, msgh, pcall_exec(current, call, ...))
@@ -725,8 +761,7 @@ if lua_version < "5.3" then
 
 
       if not is_luajit then
-         local math_log = math.log
-         math.log = function(x, base)
+         M.math.log = function(x, base)
             if base ~= nil then
                return math_log(x)/math_log(base)
             else
@@ -736,11 +771,8 @@ if lua_version < "5.3" then
       end
 
 
-      local package = package
       if not is_luajit then
-         local io_open = io.open
-         local table_concat = table.concat
-         function package.searchpath(name, path, sep, rep)
+         function M.package.searchpath(name, path, sep, rep)
             sep = (sep or "."):gsub("(%p)", "%%%1")
             rep = (rep or package.config:sub(1, 1)):gsub("(%%)", "%%%1")
             local pname = name:gsub(sep, rep):gsub("(%%)", "%%%1")
@@ -758,48 +790,29 @@ if lua_version < "5.3" then
          end
       end
 
-      local p_index = { searchers = package.loaders }
-      local rawset = rawset
-      setmetatable(package, {
-         __index = p_index,
-         __newindex = function(p, k, v)
-            if k == "searchers" then
-               rawset(p, "loaders", v)
-               p_index.searchers = v
-            else
-               rawset(p, k, v)
-            end
-         end
-      })
 
-
-      local string_gsub = string.gsub
       local function fix_pattern(pattern)
          return (string_gsub(pattern, "%z", "%%z"))
       end
 
-      local string_find = string.find
-      function string.find(s, pattern, ...)
+      function M.string.find(s, pattern, ...)
          return string_find(s, fix_pattern(pattern), ...)
       end
 
-      local string_gmatch = string.gmatch
-      function string.gmatch(s, pattern)
+      function M.string.gmatch(s, pattern)
          return string_gmatch(s, fix_pattern(pattern))
       end
 
-      function string.gsub(s, pattern, ...)
+      function M.string.gsub(s, pattern, ...)
          return string_gsub(s, fix_pattern(pattern), ...)
       end
 
-      local string_match = string.match
-      function string.match(s, pattern, ...)
+      function M.string.match(s, pattern, ...)
          return string_match(s, fix_pattern(pattern), ...)
       end
 
       if not is_luajit then
-         local string_rep = string.rep
-         function string.rep(s, n, sep)
+         function M.string.rep(s, n, sep)
             if sep ~= nil and sep ~= "" and n >= 2 then
                return s .. string_rep(sep..s, n-1)
             else
@@ -809,7 +822,6 @@ if lua_version < "5.3" then
       end
 
       if not is_luajit then
-         local string_format = string.format
          do
             local addqt = {
                ["\n"] = "\\\n",
@@ -821,15 +833,14 @@ if lua_version < "5.3" then
                return addqt[c] or string_format("\\%03d", c:byte())
             end
 
-            local _unpack = unpack
-            function string.format(fmt, ...)
+            function M.string.format(fmt, ...)
                local args, n = { ... }, select('#', ...)
                local i = 0
                local function adjust_fmt(lead, mods, kind)
                   if #lead % 2 == 0 then
                      i = i + 1
                      if kind == "s" then
-                        args[i] = tostring(args[i])
+                        args[i] = _G.tostring(args[i])
                      elseif kind == "q" then
                         args[i] = '"'..string_gsub(args[i], "[%z%c\\\"\n]", addquoted)..'"'
                         return lead.."%"..mods.."s"
@@ -837,16 +848,13 @@ if lua_version < "5.3" then
                   end
                end
                fmt = string_gsub(fmt, "(%%*)%%([%d%.%-%+%# ]*)(%a)", adjust_fmt)
-               return string_format(fmt, _unpack(args, 1, n))
+               return string_format(fmt, unpack(args, 1, n))
             end
          end
       end
 
 
-      local io_open = io.open
-      local io_write = io.write
-      local io_output = io.output
-      function io.write(...)
+      function M.io.write(...)
          local res, msg, errno = io_write(...)
          if res then
             return io_output()
@@ -856,28 +864,23 @@ if lua_version < "5.3" then
       end
 
       if not is_luajit then
-         local lines_iterator
-         do
-            local function helper( st, var_1, ... )
-               if var_1 == nil then
-                  if st.doclose then st.f:close() end
-                  if (...) ~= nil then
-                     error((...), 2)
-                  end
+         local function helper(st, var_1, ...)
+            if var_1 == nil then
+               if st.doclose then st.f:close() end
+               if (...) ~= nil then
+                  error((...), 2)
                end
-               return var_1, ...
             end
+            return var_1, ...
+         end
 
-            local _unpack = unpack
-            function lines_iterator(st)
-               return helper(st, st.f:read(_unpack(st, 1, st.n)))
-            end
+         local function lines_iterator(st)
+            return helper(st, st.f:read(unpack(st, 1, st.n)))
          end
 
          local valid_format = { ["*l"] = true, ["*n"] = true, ["*a"] = true }
 
-         local io_input = io.input
-         function io.lines(fname, ...)
+         function M.io.lines(fname, ...)
             local doclose, file, msg
             if fname ~= nil then
                doclose, file, msg = true, io_open(fname, "r")
@@ -893,41 +896,15 @@ if lua_version < "5.3" then
             end
             return lines_iterator, st
          end
-
-         do
-            local io_stdout = io.stdout
-            local io_type = io.type
-            local file_meta = gmt(io_stdout)
-            if type(file_meta) == "table" and type(file_meta.__index) == "table" then
-               local file_write = file_meta.__index.write
-               file_meta.__index.write = function(self, ...)
-                  local res, msg, errno = file_write(self, ...)
-                  if res then
-                     return self
-                  else
-                     return nil, msg, errno
-                  end
-               end
-
-               file_meta.__index.lines = function(self, ...)
-                  if io_type(self) == "closed file" then
-                     error("attempt to use a closed file", 2)
-                  end
-                  local st = { f=self, doclose=false, n=select('#', ...), ... }
-                  for i = 1, st.n do
-                     if type(st[i]) ~= "number" and not valid_format[st[i]] then
-                        error("bad argument #"..(i+1).." to 'for iterator' (invalid format)", 2)
-                     end
-                  end
-                  return lines_iterator, st
-               end
-            end
-         end
       end -- not luajit
 
 
    end -- lua 5.1
 
 end -- lua < 5.3
+
+
+-- return module table
+return M
 
 -- vi: set expandtab softtabstop=3 shiftwidth=3 :

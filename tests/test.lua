@@ -37,7 +37,7 @@ local V = _VERSION:gsub("^.*(%d+)%.(%d+)$", "%1%2")
 if jit then V = "jit" end
 
 print( "testing Lua API ..." )
-package.path = "../?.lua;"..package.path
+package.path = "../?.lua;../?/init.lua;"..package.path
 package.cpath = "./?-"..V..".so;./?-"..V..".dll;./?.so;./?.dll"
 require("compat53")
 
