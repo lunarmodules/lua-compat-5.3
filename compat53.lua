@@ -328,12 +328,21 @@ if lua_version < "5.3" then
         #setmetatable({}, { __len = function() return 1 end }) == 1
 
 
-      -- table that maps each running coroutine to the coroutine that resumed it
-      -- this is used to build complete tracebacks when "coroutine-friendly" pcall
-      -- is used.
-      local pcall_previous = {}
-      local pcall_callOf = {}
-      local xpcall_running = {}
+      -- the (x)pcall implementations start a new coroutine internally
+      -- to allow yielding even in Lua 5.1. to allow for accurate
+      -- stack traces we keep track of the nested coroutine activations
+      -- in the weak tables below:
+      local weak_meta = { __mode = "kv" }
+      -- table that maps each running coroutine started by pcall to
+      -- the coroutine that resumed it (user coroutine *or* pcall
+      -- coroutine!)
+      local pcall_previous = setmetatable({}, weak_meta)
+      -- reverse of `pcall_mainOf`. maps a user coroutine to the
+      -- currently active pcall coroutine started within it
+      local pcall_callOf = setmetatable({}, weak_meta)
+      -- similar to `pcall_mainOf` but is used only while executing
+      -- the error handler of xpcall (thus no nesting is necessary!)
+      local xpcall_running = setmetatable({}, weak_meta)
       local coroutine_running = coroutine.running
 
       -- handle debug functions
@@ -618,7 +627,9 @@ if lua_version < "5.3" then
          return result
       end
 
-      local pcall_mainOf = {}
+      -- maps the internal pcall coroutines to the user coroutine that
+      -- *should* be running if pcall didn't use coroutines internally
+      local pcall_mainOf = setmetatable({}, weak_meta)
 
       if not is_luajit52 then
          function coroutine.running()
