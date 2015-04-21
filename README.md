@@ -203,5 +203,5 @@ This package contains code written by:
   [19]: https://github.com/keplerproject/lua-compat-5.3/wiki/lua_arith
   [20]: https://github.com/keplerproject/lua-compat-5.3/wiki/luaL_checkversion
   [21]: https://github.com/keplerproject/lua-compat-5.3/wiki/luaL_Buffer
-  [22]: https://github.com/keplerproject/lua-compat-5.2/wiki/coroutine.running
+  [22]: https://github.com/keplerproject/lua-compat-5.3/wiki/coroutine.running
 
