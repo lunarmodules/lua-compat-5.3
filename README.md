@@ -67,7 +67,7 @@ your project:
   5.3 sources or from the `struct` module. (`struct` is not 100%
   compatible to Lua 5.3's string packing!) (See [here][4])
 * `math.maxinteger` and `math.mininteger`, `math.tointeger`, `math.type`,
-  and `math.ult` (See [here][5]
+  and `math.ult` (See [here][5])
 * `ipairs` respects `__index` metamethod
 * `table.move`
 * `table` library respects metamethods
@@ -80,12 +80,14 @@ For Lua 5.1 additionally:
 * `string.format` calls `tostring` on arguments for `%s`
 * `math.log` accepts base argument
 * `xpcall` takes additional arguments
-* `pcall` and `xpcall` can execute functions that yield
+* `pcall` and `xpcall` can execute functions that yield (see
+  [here][22] for a possible problem with `coroutine.running`)
 * `pairs` respects `__pairs` metamethod (see [here][7])
 * `rawlen` (but `#` still doesn't respect `__len` for tables)
 * `package.searchers` as alias for `package.loaders`
 * `package.searchpath` (see [here][8])
-* `coroutine` functions dealing with the main coroutine
+* `coroutine` functions dealing with the main coroutine (see
+  [here][22] for a possible problem with `coroutine.running`)
 * `coroutine.create` accepts functions written in C
 * return code of `os.execute` (see [here][9])
 * `io.write` and `file:write` return file handle
@@ -201,4 +203,5 @@ This package contains code written by:
   [19]: https://github.com/keplerproject/lua-compat-5.3/wiki/lua_arith
   [20]: https://github.com/keplerproject/lua-compat-5.3/wiki/luaL_checkversion
   [21]: https://github.com/keplerproject/lua-compat-5.3/wiki/luaL_Buffer
+  [22]: https://github.com/keplerproject/lua-compat-5.2/wiki/coroutine.running
 
