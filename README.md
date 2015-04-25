@@ -45,27 +45,18 @@ versions of the new `table` functions are used as a fallback, and
 #### Lua submodules
 
 ```lua
-local compat53 = require("compat53.base")
+local _ENV = require("compat53.module")
+if setfenv then setfenv(1, _ENV) end
 ```
 
-This loads the compatibility functions and returns them in a table
-without modifying the global environment. The returned table has a
-metatable set so that lookup of unmodified global functions should
-work as well. Some features (e.g. file methods) of `compat53` only
-take effect when applied to the global environment though, and groups
-of functions might be interdependent and should not be mixed with old
-versions of those functions. (I.e. it is recommended to use plain
-`require("compat53")` when possible!)
-
-```lua
-require("compat53.module")
-```
-
-This looks in the call stack for the closest "main" chunk (module or
-script) and replaces its environment so that you can transparently use
-the compatibility functions in this file alone without affecting other
-files. The same gotchas as for `"compat53.base"` apply. Additionally
-this relies on the availability of `debug` functions.
+The `compat53.module` module does not modify the global environment,
+and so it is safe to use in modules without affecting other Lua files.
+It is supposed to be set as the current environment (see above), i.e.
+cherry picking individual functions from this module is expressly
+*not* supported!). Not all features are available when using this
+module (e.g. yieldable (x)pcall support, string/file methods, etc.),
+so it is recommended to use plain `require("compat53")` whenever
+possible.
 
 ### C code
 
