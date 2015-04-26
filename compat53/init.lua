@@ -271,7 +271,7 @@ if lua_version == "5.1" then
          return coroutine_create52(func)
       end
 
-      function _G.pcall(func, ...)
+      function M.pcall(func, ...)
          local current = coroutine_running()
          if not current then return pcall(func, ...) end
          return pcall_exec(current, pcall_coroutine(func), ...)
@@ -290,7 +290,7 @@ if lua_version == "5.1" then
          return true, ...
       end
 
-      function _G.xpcall(f, msgh, ...)
+      function M.xpcall(f, msgh, ...)
          local current = coroutine_running()
          if not current then
             local args, n = { ... }, select('#', ...)
