@@ -530,7 +530,7 @@ if lua_version < "5.3" then
 
 
       if not is_luajit then
-         function M.xpall(f, msgh, ...)
+         function M.xpcall(f, msgh, ...)
             local args, n = { ... }, select('#', ...)
             return xpcall(function() return f(unpack(args, 1, n)) end, msgh)
          end
