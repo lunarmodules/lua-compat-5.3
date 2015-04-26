@@ -7,8 +7,8 @@ local M = _G
 if lua_version < "5.3" then
 
    -- cache globals in upvalues
-   local error, getmetatable, ipairs, pairs, pcall, require, select, setmetatable, type =
-         error, getmetatable, ipairs, pairs, pcall, require, select, setmetatable, type
+   local error, ipairs, pairs, pcall, require, select, setmetatable, type =
+         error, ipairs, pairs, pcall, require, select, setmetatable, type
    local debug, math, package, string, table =
          debug, math, package, string, table
 
@@ -352,8 +352,8 @@ if lua_version < "5.3" then
         #setmetatable({}, { __len = function() return 1 end }) == 1
 
       -- cache globals in upvalues
-      local load, loadfile, loadstring, setfenv, tostring, unpack, xpcall =
-            load, loadfile, loadstring, setfenv, tostring, unpack, xpcall
+      local load, loadfile, loadstring, setfenv, unpack, xpcall =
+            load, loadfile, loadstring, setfenv, unpack, xpcall
       local coroutine, io, os = coroutine, io, os
       local coroutine_create = coroutine.create
       local coroutine_resume = coroutine.resume
@@ -525,6 +525,14 @@ if lua_version < "5.3" then
                error("bad argument #1 to 'rawlen' (table or string expected)", 2)
             end
             return #v
+         end
+      end
+
+
+      if not is_luajit then
+         function M.xpall(f, msgh, ...)
+            local args, n = { ... }, select('#', ...)
+            return xpcall(function() return f(unpack(args, 1, n)) end, msgh)
          end
       end
 

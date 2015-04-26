@@ -9,8 +9,8 @@ local lua_version = _VERSION:sub(-3)
 if lua_version == "5.1" then
 
    -- cache globals
-   local error, pcall, rawset, select, setmetatable, tostring, type, unpack, xpcall =
-         error, pcall, rawset, select, setmetatable, tostring, type, unpack, xpcall
+   local error, pcall, rawset, select, setmetatable, tostring, unpack, xpcall =
+         error, pcall, rawset, select, setmetatable, tostring, unpack, xpcall
    local coroutine, debug, io, package, string =
          coroutine, debug, io, package, string
    local coroutine_create = coroutine.create
