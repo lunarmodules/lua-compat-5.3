@@ -36,14 +36,26 @@ end
 local V = _VERSION:gsub("^.*(%d+)%.(%d+)$", "%1%2")
 if jit then V = "jit" end
 
-print( "testing Lua API ..." )
-package.path = "../?.lua;"..package.path
+local mode = "global"
+if arg[1] == "module" then
+  mode = "module"
+end
+
+
+package.path = "../?.lua;../?/init.lua;"..package.path
 package.cpath = "./?-"..V..".so;./?-"..V..".dll;./?.so;./?.dll"
-require("compat53")
+if mode == "module" then
+  print( "testing Lua API using `compat53.module` ..." )
+  _ENV = require("compat53.module")
+  if setfenv then setfenv(1, _ENV) end
+else
+  print( "testing Lua API using `compat53` ..." )
+  require("compat53")
+end
 
 ___''
 do
-  local t = setmetatable( {}, { __index = { 1, false, "three" } } )
+  local t = setmetatable({}, { __index = { 1, false, "three" } })
   for i,v in ipairs(t) do
     print("ipairs", i, v)
   end
@@ -338,22 +350,24 @@ do
    print("xpcall()", xpcall(func, debug.traceback, false))
    print("xpcall()", xpcall(func, debug.traceback, true))
    print("xpcall()", xpcall(func, tb, true))
-   local function func2(cb)
-     print("xpcall()", xpcall(cb, debug.traceback, "str"))
+   if mode ~= "module" then
+     local function func2(cb)
+       print("xpcall()", xpcall(cb, debug.traceback, "str"))
+     end
+     local function func3(cb)
+       print("pcall()", pcall(cb, "str"))
+     end
+     local function cb(arg)
+        coroutine.yield(2)
+        return arg
+     end
+     local c = coroutine.wrap(func2)
+     print("xpcall()", c(cb))
+     print("xpcall()", c())
+     local c = coroutine.wrap(func3)
+     print("pcall()", c(cb))
+     print("pcall()", c())
    end
-   local function func3(cb)
-     print("pcall()", pcall(cb, "str"))
-   end
-   local function cb(arg)
-      coroutine.yield(2)
-      return arg
-   end
-   local c = coroutine.wrap(func2)
-   print("xpcall()", c(cb))
-   print("xpcall()", c())
-   local c = coroutine.wrap(func3)
-   print("pcall()", c(cb))
-   print("pcall()", c())
 end
 
 
@@ -387,9 +401,11 @@ do
    print("coroutine.running()", F(coroutine.running()))
    local main_co, co1, co2 = coroutine.running()
    -- coroutine.yield
-   print("coroutine.yield()", pcall(function()
-      coroutine.yield(1, 2, 3)
-   end))
+   if mode ~= "module" then
+     print("coroutine.yield()", pcall(function()
+        coroutine.yield(1, 2, 3)
+     end))
+   end
    print("coroutine.yield()", coroutine.wrap(function()
       coroutine.yield(1, 2, 3)
    end)())
@@ -428,13 +444,13 @@ do
    local path, prefix = "./?.lua;?/init.lua;../?.lua", "package.searchpath()"
    print(prefix, package.searchpath("no.such.module", path))
    print(prefix, package.searchpath("no.such.module", ""))
-   print(prefix, package.searchpath("compat52", path))
+   print(prefix, package.searchpath("compat53", path))
    print(prefix, package.searchpath("no:such:module", path, ":", "|"))
 end
 
 
 ___''
-do
+if mode ~= "module" then
    local function mod_func() return {} end
    local function my_searcher(name)
       if name == "my.module" then
@@ -462,19 +478,19 @@ end
 
 ___''
 do
-   print("string.find()", ("abc\0abc\0abc"):find("[^a\0]+"))
-   print("string.find()", ("abc\0abc\0abc"):find("%w+\0", 5))
-   for x in ("abc\0def\0ghi"):gmatch("[^\0]+") do
+   print("string.find()", string.find("abc\0abc\0abc", "[^a\0]+"))
+   print("string.find()", string.find("abc\0abc\0abc", "%w+\0", 5))
+   for x in string.gmatch("abc\0def\0ghi", "[^\0]+") do
       print("string.gmatch()", x)
    end
-   for x in ("abc\0def\0ghi"):gmatch("%w*\0") do
+   for x in string.gmatch("abc\0def\0ghi", "%w*\0") do
       print("string.gmatch()", #x)
    end
-   print("string.gsub()", ("abc\0def\0ghi"):gsub("[\0]", "X"))
-   print("string.gsub()", ("abc\0def\0ghi"):gsub("%w*\0", "X"))
-   print("string.gsub()", ("abc\0def\0ghi"):gsub("%A", "X"))
-   print("string.match()", ("abc\0abc\0abc"):match("([^\0a]+)"))
-   print("string.match()", #("abc\0abc\0abc"):match(".*\0"))
+   print("string.gsub()", string.gsub("abc\0def\0ghi", "[\0]", "X"))
+   print("string.gsub()", string.gsub("abc\0def\0ghi", "%w*\0", "X"))
+   print("string.gsub()", string.gsub("abc\0def\0ghi", "%A", "X"))
+   print("string.match()", string.match("abc\0abc\0abc", "([^\0a]+)"))
+   print("string.match()", #string.match("abc\0abc\0abc", ".*\0"))
    print("string.rep()", string.rep("a", 0))
    print("string.rep()", string.rep("b", 1))
    print("string.rep()", string.rep("c", 4))
@@ -533,30 +549,32 @@ do
    print("io.lines()", pcall(function()
       for l in io.lines("no_such_file.txt") do print(l) end
    end))
-   local f = assert(io.open("test.lua", "r"))
-   for a,b in f:lines(2, "*l") do
-      print("file:lines()", a, b)
-      break
+   if mode ~= "module" then
+     local f = assert(io.open("test.lua", "r"))
+     for a,b in f:lines(2, "*l") do
+        print("file:lines()", a, b)
+        break
+     end
+     f:close()
+     f = assert(io.open("data.txt", "r"))
+     for n1,n2,rest in f:lines("*n", "*n", "*a") do
+        print("file:lines()", n1, n2, rest)
+     end
+     f:close()
+     f = assert(io.open("data.txt", "r"))
+     for l in f:lines() do
+        print("file:lines()", l)
+     end
+     f:close()
+     print("file:lines()", pcall(function()
+        for l in f:lines() do print(l) end
+     end))
+     print("file:lines()", pcall(function()
+        local f = assert(io.open("data.txt", "r"))
+        for l in f:lines("*l", "*x") do print(l) end
+        f:close()
+     end))
    end
-   f:close()
-   f = assert(io.open("data.txt", "r"))
-   for n1,n2,rest in f:lines("*n", "*n", "*a") do
-      print("file:lines()", n1, n2, rest)
-   end
-   f:close()
-   f = assert(io.open("data.txt", "r"))
-   for l in f:lines() do
-      print("file:lines()", l)
-   end
-   f:close()
-   print("file:lines()", pcall(function()
-      for l in f:lines() do print(l) end
-   end))
-   print("file:lines()", pcall(function()
-      local f = assert(io.open("data.txt", "r"))
-      for l in f:lines("*l", "*x") do print(l) end
-      f:close()
-   end))
    os.remove("data.txt")
 end
 ___''
