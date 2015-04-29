@@ -99,6 +99,7 @@ static void compat53_rawseti (lua_State *L, int i, lua_Integer n) {
 #endif /* ltablib_c */
 
 #ifdef lstrlib_c
+#include <lualib.h>
 /* move the string library open function out of the way (we only take
  * the string packing functions)!
  */
