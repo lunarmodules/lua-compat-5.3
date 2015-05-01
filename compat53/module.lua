@@ -40,14 +40,6 @@ if lua_version < "5.3" then
       end
    end
 
-   local function checktype(x, t, i, f)
-      local xt = type(x)
-      if xt ~= t then
-         error("bad argument #"..i.." to '"..f.."' ("..t..
-               " expected, got "..xt..")", 0)
-      end
-   end
-
 
    -- load utf8 library
    local utf8_ok, utf8lib = pcall(require, "compat53.utf8")
@@ -94,7 +86,7 @@ if lua_version < "5.3" then
 
    -- update math library
    do
-      local maxint, minint = 1, 0
+      local maxint, minint = 1
 
       while maxint+1 > maxint and 2*maxint > maxint do
          maxint = maxint * 2
@@ -269,10 +261,10 @@ if lua_version < "5.3" then
                   x, y, a, b = y, x, b, a
                end
                if not cmp(y, z) then
-                  y, z, b, c = z, y, c, b
+                  y, b = z, c
                end
                if not cmp(x, y) then
-                  x, y, a, b = y, x, b, a
+                  y, b = x, a
                end
                return b, y
             else

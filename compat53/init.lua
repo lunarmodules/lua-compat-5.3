@@ -46,7 +46,7 @@ if lua_version == "5.1" then
 
 
    if not is_luajit then
-      local function helper(st, var_1, ...)
+      local function helper(_, var_1, ...)
          if var_1 == nil then
             if (...) ~= nil then
                error((...), 2)
@@ -197,7 +197,7 @@ if lua_version == "5.1" then
             msg = msg:gsub("%z+", function(zeros)
                return "\n\t(..."..#zeros.." tail call(s)...)"
             end)
-            msg = msg:gsub("\001", function(zeros)
+            msg = msg:gsub("\001", function()
                return "\n\t..."
             end)
             return msg
