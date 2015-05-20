@@ -700,5 +700,10 @@ print(pcall(mod.tolstring, t))
 
 ___''
 print(mod.buffer())
+
+___''
+print(mod.exec("exit 0"))
+print(mod.exec("exit 1"))
+print(mod.exec("exit 25"))
 ___''
 

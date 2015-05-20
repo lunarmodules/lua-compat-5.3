@@ -45,7 +45,6 @@
  * lua_upvaluejoin
  * lua_version
  * lua_yieldk
- * luaL_execresult
  * luaL_loadbufferx
  * luaL_loadfilex
  */
@@ -150,6 +149,9 @@ COMPAT53_API void luaL_traceback (lua_State *L, lua_State *L1, const char *msg, 
 
 #define luaL_fileresult COMPAT53_CONCAT(COMPAT53_PREFIX, L_fileresult)
 COMPAT53_API int luaL_fileresult (lua_State *L, int stat, const char *fname);
+
+#define luaL_execresult COMPAT53_CONCAT(COMPAT53_PREFIX, L_execresult)
+COMPAT53_API int luaL_execresult (lua_State *L, int stat);
 #endif /* COMPAT53_IS_LUAJIT */
 
 #define lua_callk(L, na, nr, ctx, cont) \

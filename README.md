@@ -149,6 +149,7 @@ For Lua 5.1 additionally:
 * `luaL_setmetatable`
 * `luaL_getsubtable`
 * `luaL_traceback`
+* `luaL_execresult`
 * `luaL_fileresult`
 * `luaL_checkversion` (with empty body, only to avoid compile errors,
   see [here][20])
@@ -177,7 +178,6 @@ For Lua 5.1 additionally:
   * `lua_upvaluejoin` (5.1)
   * `lua_version` (5.1)
   * `lua_yieldk` (5.1)
-  * `luaL_execresult` (5.1)
   * `luaL_loadbufferx` (5.1)
   * `luaL_loadfilex` (5.1)
 

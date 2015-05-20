@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <lua.h>
 #include <lauxlib.h>
 #include "compat-5.3.h"
@@ -256,6 +257,11 @@ static int test_buffer (lua_State *L) {
   return 1;
 }
 
+static int test_exec (lua_State *L) {
+  const char *cmd = luaL_checkstring(L, 1);
+  return luaL_execresult(L, system(cmd));
+}
+
 
 static const luaL_Reg funcs[] = {
   { "isinteger", test_isinteger },
@@ -277,6 +283,7 @@ static const luaL_Reg funcs[] = {
   { "globals", test_globals },
   { "tolstring", test_tolstring },
   { "buffer", test_buffer },
+  { "exec", test_exec },
   { NULL, NULL }
 };
 
