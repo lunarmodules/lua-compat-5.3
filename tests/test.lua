@@ -505,7 +505,7 @@ do
          return _tostring(v)
       end
    end
-   print("string.format()", string.format("%q", "\"\\\0000\0010\r0\n0\t0\""))
+   print("string.format()", string.format("%q", "\"\\\0000\0010\002\r\n0\t0\""))
    print("string.format()", string.format("%12.3fx%%sxx%.6s", 3.1, {}))
    print("string.format()", string.format("%-3f %%%s %%s", 3.1, true))
    print("string.format()", string.format("% 3.2g %%d %%%s", 3.1, nil))

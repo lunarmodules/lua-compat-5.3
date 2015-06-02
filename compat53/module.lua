@@ -671,8 +671,8 @@ if lua_version < "5.3" then
                ["\""] = "\\\""
             }
 
-            local function addquoted(c)
-               return addqt[c] or string_format("\\%03d", c:byte())
+            local function addquoted(c, d)
+               return (addqt[c] or string_format(d~="" and "\\%03d" or "\\%d", c:byte()))..d
             end
 
             function M.string.format(fmt, ...)
@@ -684,7 +684,7 @@ if lua_version < "5.3" then
                      if kind == "s" then
                         args[i] = _G.tostring(args[i])
                      elseif kind == "q" then
-                        args[i] = '"'..string_gsub(args[i], "[%z%c\\\"\n]", addquoted)..'"'
+                        args[i] = '"'..string_gsub(args[i], "([%z%c\\\"\n])(%d?)", addquoted)..'"'
                         return lead.."%"..mods.."s"
                      end
                   end
