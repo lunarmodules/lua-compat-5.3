@@ -259,6 +259,9 @@ COMPAT53_API size_t lua_stringtonumber (lua_State *L, const char *s);
 #define luaL_getmetafield(L, o, e) \
   (luaL_getmetafield(L, o, e) ? lua_type(L, -1) : LUA_TNIL)
 
+#define luaL_newmetatable(L, tn) \
+  (luaL_newmetatable(L, tn) ? (lua_pushstring(L, tn), lua_setfield(L, -2, "__name"), 1) : 0)
+
 #define luaL_requiref COMPAT53_CONCAT(COMPAT53_PREFIX, L_requiref_53)
 COMPAT53_API void luaL_requiref (lua_State *L, const char *modname,
                                  lua_CFunction openf, int glb );

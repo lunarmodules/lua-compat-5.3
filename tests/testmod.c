@@ -205,7 +205,10 @@ static int test_udata (lua_State *L) {
   (void)u2;
   lua_pushlightuserdata(L, luaL_testudata(L, u1pos, tname));
   lua_pushlightuserdata(L, luaL_testudata(L, u2pos, tname));
-  return 2;
+  luaL_getmetatable(L, "utype1");
+  lua_getfield(L, -1, "__name");
+  lua_replace(L, -2);
+  return 3;
 }
 
 static int test_subtable (lua_State *L) {
