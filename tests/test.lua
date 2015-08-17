@@ -45,13 +45,24 @@ end
 package.path = "../?.lua;../?/init.lua;"..package.path
 package.cpath = "./?-"..V..".so;./?-"..V..".dll;./?.so;./?.dll"
 if mode == "module" then
-  print( "testing Lua API using `compat53.module` ..." )
+  print("testing Lua API using `compat53.module` ...")
   _ENV = require("compat53.module")
   if setfenv then setfenv(1, _ENV) end
 else
-  print( "testing Lua API using `compat53` ..." )
+  print("testing Lua API using `compat53` ...")
   require("compat53")
 end
+
+
+___''
+do
+  print("assert", F(pcall(assert, false)))
+  print("assert", F(pcall(assert, false, nil)))
+  print("assert", F(pcall(assert, false, "error msg")))
+  print("assert", F(pcall(assert, nil, {})))
+  print("assert", F(pcall(assert, 1, 2, 3)))
+end
+
 
 ___''
 do

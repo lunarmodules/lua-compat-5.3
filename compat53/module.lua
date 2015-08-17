@@ -147,6 +147,20 @@ if lua_version < "5.3" then
    end
 
 
+   -- assert should allow non-string error objects
+   do
+      function M.assert(cond, ...)
+         if cond then
+            return cond, ...
+         elseif select('#', ...) > 0 then
+            error((...), 0)
+         else
+            error("assertion failed!", 0)
+         end
+      end
+   end
+
+
    -- ipairs should respect __index metamethod
    do
       local function ipairs_iterator(st, var)
