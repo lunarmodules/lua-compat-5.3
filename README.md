@@ -84,6 +84,7 @@ your project:
   compatible to Lua 5.3's string packing!) (See [here][4])
 * `math.maxinteger` and `math.mininteger`, `math.tointeger`, `math.type`,
   and `math.ult` (see [here][5])
+* `assert` accepts non-string error messages
 * `ipairs` respects `__index` metamethod
 * `table.move`
 * `table` library respects metamethods
