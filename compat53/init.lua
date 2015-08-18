@@ -206,37 +206,19 @@ if lua_version == "5.1" then
    end -- debug table available
 
 
-   local main_coroutine = coroutine_create(function() end)
-
    if not is_luajit52 then
+      local coroutine_running52 = M.coroutine.running
       function M.coroutine.running()
-         local co = coroutine_running()
-         if co then
-            return pcall_mainOf[co] or co, false
+         local co, ismain = coroutine_running52()
+         if ismain then
+            return co, true
          else
-            return main_coroutine, true
+            return pcall_mainOf[co] or co, false
          end
       end
    end
 
    if not is_luajit then
-      function M.coroutine.resume(co, ...)
-         if co == main_coroutine then
-            return false, "cannot resume non-suspended coroutine"
-         else
-            return coroutine_resume(co, ...)
-         end
-      end
-
-      function M.coroutine.status(co)
-         local notmain = coroutine_running()
-         if co == main_coroutine then
-            return notmain and "normal" or "running"
-         else
-            return coroutine_status(co)
-         end
-      end
-
       local function pcall_results(current, call, success, ...)
          if coroutine_status(call) == "suspended" then
             return pcall_results(current, call, coroutine_resume(call, coroutine_yield(...)))
