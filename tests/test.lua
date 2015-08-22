@@ -540,6 +540,18 @@ end
 ___''
 do
    writefile("data.txt", "123 18.8 hello world\ni'm here\n")
+   io.input("data.txt")
+   print(io.read("*n", "*number", "*l", "*a"))
+   io.input("data.txt")
+   print(io.read("n", "number", "l", "a"))
+   io.input(io.stdin)
+   os.remove("data.txt")
+end
+
+
+___''
+do
+   writefile("data.txt", "123 18.8 hello world\ni'm here\n")
    for a,b in io.lines("test.lua", 2, "*l") do
       print("io.lines()", a, b)
       break
@@ -548,7 +560,7 @@ do
       print("io.lines()", l)
       break
    end
-   for n1,n2,rest in io.lines("data.txt", "*n", "*n", "*a") do
+   for n1,n2,rest in io.lines("data.txt", "*n", "n", "*a") do
       print("io.lines()", n1, n2, rest)
    end
    for l in io.lines("data.txt") do
