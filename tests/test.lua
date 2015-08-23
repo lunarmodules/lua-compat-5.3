@@ -541,10 +541,18 @@ ___''
 do
    writefile("data.txt", "123 18.8 hello world\ni'm here\n")
    io.input("data.txt")
-   print(io.read("*n", "*number", "*l", "*a"))
+   print("io.read()", io.read("*n", "*number", "*l", "*a"))
    io.input("data.txt")
-   print(io.read("n", "number", "l", "a"))
+   print("io.read()", io.read("n", "number", "l", "a"))
    io.input(io.stdin)
+   if mode ~= "module" then
+     local f = assert(io.open("data.txt", "r"))
+     print("file:read()", f:read("*n", "*number", "*l", "*a"))
+     f:close()
+     f = assert(io.open("data.txt", "r"))
+     print("file:read()", f:read("n", "number", "l", "a"))
+     f:close()
+   end
    os.remove("data.txt")
 end
 
@@ -580,7 +588,7 @@ do
      end
      f:close()
      f = assert(io.open("data.txt", "r"))
-     for n1,n2,rest in f:lines("*n", "*n", "*a") do
+     for n1,n2,rest in f:lines("*n", "n", "*a") do
         print("file:lines()", n1, n2, rest)
      end
      f:close()
