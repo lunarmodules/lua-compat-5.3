@@ -4,8 +4,14 @@
 #include <stddef.h>
 #include <limits.h>
 #include <string.h>
+#if defined( __cplusplus ) && !defined( COMPAT53_LUA_CPP )
+extern "C" {
+#endif
 #include <lua.h>
 #include <lauxlib.h>
+#if defined( __cplusplus ) && !defined( COMPAT53_LUA_CPP )
+}
+#endif
 
 
 #if defined(COMPAT53_PREFIX)
