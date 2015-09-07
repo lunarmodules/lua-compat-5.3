@@ -259,7 +259,7 @@ COMPAT53_API void lua_rotate (lua_State *L, int idx, int n);
 #define lua_seti COMPAT53_CONCAT(COMPAT53_PREFIX, _seti)
 COMPAT53_API void lua_seti (lua_State *L, int index, lua_Integer i);
 
-#define lua_strtonum COMPAT53_CONCAT(COMPAT53_PREFIX, _stringtonumber)
+#define lua_stringtonumber COMPAT53_CONCAT(COMPAT53_PREFIX, _stringtonumber)
 COMPAT53_API size_t lua_stringtonumber (lua_State *L, const char *s);
 
 #define luaL_getmetafield(L, o, e) \
