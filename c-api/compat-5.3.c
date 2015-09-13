@@ -155,6 +155,18 @@ COMPAT53_API void luaL_checkversion (lua_State *L) {
 }
 
 
+COMPAT53_API void luaL_checkstack (lua_State *L, int sp, const char *msg) {
+  if (!lua_checkstack(L, sp+LUA_MINSTACK)) {
+    if (msg != NULL)
+      luaL_error(L, "stack overflow (%s)", msg);
+    else {
+      lua_pushliteral(L, "stack overflow");
+      lua_error(L);
+    }
+  }
+}
+
+
 COMPAT53_API int luaL_getsubtable (lua_State *L, int i, const char *name) {
   int abs_i = lua_absindex(L, i);
   luaL_checkstack(L, 3, "not enough stack slots");

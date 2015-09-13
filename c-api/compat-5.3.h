@@ -131,6 +131,9 @@ COMPAT53_API lua_Number lua_tonumberx (lua_State *L, int i, int *isnum);
 #define luaL_checkversion COMPAT53_CONCAT(COMPAT53_PREFIX, L_checkversion)
 COMPAT53_API void luaL_checkversion (lua_State *L);
 
+#define luaL_checkstack COMPAT53_CONCAT(COMPAT53_PREFIX, L_checkstack_53)
+COMPAT53_API void luaL_checkstack (lua_State *L, int sp, const char *msg);
+
 #define luaL_getsubtable COMPAT53_CONCAT(COMPAT53_PREFIX, L_getsubtable)
 COMPAT53_API int luaL_getsubtable (lua_State* L, int i, const char *name);
 
