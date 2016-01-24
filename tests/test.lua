@@ -248,6 +248,48 @@ print("math.ult", pcall(math.ult, 1, 2.1))
 ___''
 
 
+if utf8.len then
+  local unpack = table.unpack or unpack
+  local function utf8rt(s)
+    local t = { utf8.codepoint(s, 1, #s) }
+    local ps, cs = {}, {}
+    for p,c in utf8.codes(s) do
+      ps[#ps+1], cs[#cs+1] = p, c
+    end
+    print("utf8.codes", unpack(ps))
+    print("utf8.codes", unpack(cs))
+    print("utf8.codepoint", unpack(t))
+    print("utf8.len", utf8.len(s), #t, #s)
+    print("utf8.char", utf8.char(unpack(t)))
+  end
+  utf8rt("äöüßÄÖÜ")
+  utf8rt("abcdefg")
+  ___''
+  local s = "äöüßÄÖÜ"
+  print("utf8.offset", utf8.offset(s, 1, 1))
+  print("utf8.offset", utf8.offset(s, 2, 1))
+  print("utf8.offset", utf8.offset(s, 3, 1))
+  print("utf8.offset", pcall(utf8.offset, s, 3, 2))
+  print("utf8.offset", utf8.offset(s, 3, 3))
+  print("utf8.offset", utf8.offset(s, -1, 7))
+  print("utf8.offset", utf8.offset(s, -2, 7))
+  print("utf8.offset", utf8.offset(s, -3, 7))
+  print("utf8.offset", utf8.offset(s, -1))
+  ___''
+else
+  print("XXX: utf8 module not available")
+end
+
+
+if string.pack then
+  -- TODO
+  print("TODO: test string packing/unpacking")
+  ___''
+else
+  print("XXX: string packing not available")
+end
+
+
 print("testing Lua API for Lua 5.1 ...")
 
 ___''
