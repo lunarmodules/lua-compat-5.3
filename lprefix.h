@@ -51,16 +51,10 @@
 
 #ifdef lutf8lib_c
 #  define luaopen_utf8 luaopen_compat53_utf8
-#  include <stdarg.h>
 /* we don't support the %U format string of lua_pushfstring!
  * code below adapted from the Lua 5.3 sources:
  */
-static const char *compat53_utf8_escape (lua_State* L, ...) {
-  long x = 0;
-  va_list argp;
-  va_start(argp, L);
-  x = (long)va_arg(argp, long);
-  va_end(argp);
+static const char *compat53_utf8_escape (lua_State* L, long x) {
   if (x < 0x80) { /* ASCII */
     char c = (char)x;
     lua_pushlstring(L, &c, 1);

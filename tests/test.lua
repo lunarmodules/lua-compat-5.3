@@ -42,7 +42,7 @@ if arg[1] == "module" then
 end
 
 
-package.path = "../?.lua;../?/init.lua;"..package.path
+package.path = "../?.lua;../?/init.lua"
 package.cpath = "./?-"..V..".so;./?-"..V..".dll;./?.so;./?.dll"
 if mode == "module" then
   print("testing Lua API using `compat53.module` ...")
