@@ -601,7 +601,10 @@ if lua_version < "5.3" then
             if code == 0 then
                return true, "exit", code
             else
-               return nil, "exit", code/256 -- only correct on Linux!
+               if package.config:sub(1, 1) == '/' then
+                  code = code/256 -- only correct on Linux!
+               end
+               return nil, "exit", code
             end
          end
       end
