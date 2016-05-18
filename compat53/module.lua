@@ -548,7 +548,7 @@ if lua_version < "5.3" then
             return chunk
          end
 
-         M.loadstring = load
+         M.loadstring = M.load
 
          function M.loadfile(file, mode, env)
             mode = mode or "bt"
