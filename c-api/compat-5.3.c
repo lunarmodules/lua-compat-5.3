@@ -100,10 +100,12 @@ COMPAT53_API void lua_copy (lua_State *L, int from, int to) {
 
 COMPAT53_API void lua_len (lua_State *L, int i) {
   switch (lua_type(L, i)) {
-    case LUA_TSTRING: /* fall through */
+    case LUA_TSTRING:
+      lua_pushnumber(L, (lua_Integer)lua_objlen(L, i));
+      break;
     case LUA_TTABLE:
       if (!luaL_callmeta(L, i, "__len"))
-        lua_pushnumber(L, (int)lua_objlen(L, i));
+        lua_pushnumber(L, (lua_Integer)lua_objlen(L, i));
       break;
     case LUA_TUSERDATA:
       if (luaL_callmeta(L, i, "__len"))
@@ -136,7 +138,7 @@ COMPAT53_API lua_Integer lua_tointegerx (lua_State *L, int i, int *isnum) {
   lua_Integer n = lua_tointeger(L, i);
   if (isnum != NULL) {
     *isnum = (n != 0 || lua_isnumber(L, i));
-}
+  }
   return n;
 }
 
@@ -183,14 +185,15 @@ COMPAT53_API int luaL_getsubtable (lua_State *L, int i, const char *name) {
 }
 
 
-COMPAT53_API int luaL_len (lua_State *L, int i) {
-  int res = 0, isnum = 0;
+COMPAT53_API lua_Integer luaL_len (lua_State *L, int i) {
+  lua_Integer res = 0;
+  int isnum = 0;
   luaL_checkstack(L, 1, "not enough stack slots");
   lua_len(L, i);
-  res = (int)lua_tointegerx(L, -1, &isnum);
+  res = lua_tointegerx(L, -1, &isnum);
   lua_pop(L, 1);
   if (!isnum)
-    luaL_error(L, "object length is not a number");
+    luaL_error(L, "object length is not an integer");
   return res;
 }
 

@@ -138,7 +138,7 @@ COMPAT53_API void luaL_checkstack (lua_State *L, int sp, const char *msg);
 COMPAT53_API int luaL_getsubtable (lua_State* L, int i, const char *name);
 
 #define luaL_len COMPAT53_CONCAT(COMPAT53_PREFIX, L_len)
-COMPAT53_API int luaL_len (lua_State *L, int i);
+COMPAT53_API lua_Integer luaL_len (lua_State *L, int i);
 
 #define luaL_setfuncs COMPAT53_CONCAT(COMPAT53_PREFIX, L_setfuncs)
 COMPAT53_API void luaL_setfuncs (lua_State *L, const luaL_Reg *l, int nup);
