@@ -263,7 +263,6 @@ COMPAT53_API const char *luaL_tolstring (lua_State *L, int idx, size_t *len) {
 }
 
 
-#if !defined(COMPAT53_IS_LUAJIT)
 static int compat53_countlevels (lua_State *L) {
   lua_Debug ar;
   int li = 1, le = 1;
@@ -418,7 +417,6 @@ COMPAT53_API int luaL_execresult (lua_State *L, int stat) {
     return 3;
   }
 }
-#endif /* not COMPAT53_IS_LUAJIT */
 
 
 COMPAT53_API void luaL_buffinit (lua_State *L, luaL_Buffer_53 *B) {

@@ -72,7 +72,11 @@ your project:
   compatibility functions in your code. You have to compile and link
   `compat-5.3.c` to your project yourself. You can change the way the
   functions are exported using the `COMPAT53_API` macro (e.g. if you need
-  some `__declspec` magic).
+  some `__declspec` magic). While it is technically possible to use
+  the "lua" prefix (and it looks better in the debugger), this is
+  discouraged because LuaJIT has started to implement its own Lua 5.2+
+  C API functions, and with the "lua" prefix you'd violate the
+  one-definition rule with recent LuaJIT versions.
 
 ## What's implemented
 
