@@ -282,8 +282,9 @@ end
 
 
 if string.pack then
-  -- TODO
-  print("TODO: test string packing/unpacking")
+  local format = "bBhHlLjJdc3z"
+  local s = string.pack(format, -128, 255, -32768, 65535, -2147483648, 4294967295, -32768, 65536, 1.25, "abc", "defgh")
+  print("string.unpack", string.unpack(format, s))
   ___''
 else
   print("XXX: string packing not available")
@@ -770,6 +771,9 @@ local t = setmetatable({}, {
   __tostring = function(v) return nil end
 })
 print(pcall(mod.tolstring, t))
+local ud, meta = mod.newproxy()
+meta.__name = "XXX"
+print(mod.tolstring(ud):gsub(":.*$", ": yyy"))
 
 ___''
 print(mod.buffer())
