@@ -122,6 +122,9 @@ COMPAT53_API void lua_len (lua_State *L, int i);
 #define lua_pushstring(L, s) \
   (lua_pushstring(L, (s)), lua_tostring(L, -1))
 
+#define lua_pushlstring(L, s, len) \
+  (lua_pushlstring(L, (s), (len)), lua_tostring(L, -1))
+
 #ifndef luaL_newlibtable
 #  define luaL_newlibtable(L, l) \
   (lua_createtable(L, 0, sizeof(l)/sizeof(*(l))-1))
