@@ -98,6 +98,15 @@ static const char *compat53_utf8_escape (lua_State* L, long x) {
 #    define LUA_INTEGER_FRMLEN ""
 #    define LUA_NUMBER_FRMLEN ""
 #  endif
+#  ifndef LUA_MININTEGER
+#    define LUA_MININTEGER 0
+#  endif
+#  ifndef LUA_INTEGER_FMT
+#    define LUA_INTEGER_FMT "%d"
+#  endif
+#  ifndef LUAI_UACINT
+#    define LUAI_UACINT lua_Integer
+#  endif
 /* different Lua 5.3 versions have conflicting variants of this macro
  * in luaconf.h, there's a fallback implementation in lstrlib.c, and
  * the macro isn't used for string (un)packing anyway!
