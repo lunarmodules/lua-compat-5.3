@@ -776,6 +776,9 @@ meta.__name = "XXX"
 print(mod.tolstring(ud):gsub(":.*$", ": yyy"))
 
 ___''
+print(mod.pushstring())
+
+___''
 print(mod.buffer())
 
 ___''

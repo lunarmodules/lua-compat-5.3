@@ -246,6 +246,15 @@ static int test_tolstring (lua_State *L) {
   return 2;
 }
 
+static int test_pushstring (lua_State *L) {
+  lua_pushstring(L, lua_pushliteral(L, "abc"));
+  lua_pushstring(L, lua_pushlstring(L, "abc", 2));
+  lua_pushstring(L, lua_pushlstring(L, NULL, 0));
+  lua_pushstring(L, lua_pushstring(L, "abc"));
+  lua_pushboolean(L, NULL == lua_pushstring(L, NULL));
+  return 10;
+}
+
 static int test_buffer (lua_State *L) {
   luaL_Buffer b;
   char *p = luaL_buffinitsize(L, &b, LUAL_BUFFERSIZE+1);
@@ -285,6 +294,7 @@ static const luaL_Reg funcs[] = {
   { "uservalue", test_uservalue },
   { "globals", test_globals },
   { "tolstring", test_tolstring },
+  { "pushstring", test_pushstring },
   { "buffer", test_buffer },
   { "exec", test_exec },
   { NULL, NULL }

@@ -147,6 +147,7 @@ For Lua 5.1 additionally:
 * `lua_arith` (see [here][19])
 * `lua_compare`
 * `lua_len`, `lua_rawlen`, and `luaL_len`
+* `lua_pushstring`, `lua_pushlstring` (return value)
 * `lua_copy`
 * `lua_pushglobaltable`
 * `luaL_testudata`
