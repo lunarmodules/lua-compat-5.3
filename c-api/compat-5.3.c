@@ -546,7 +546,7 @@ COMPAT53_API void lua_seti (lua_State *L, int index, lua_Integer i) {
 
 
 #if !defined(lua_str2number)
-#  define lua_str2number(s, p)  strtod(s, p)
+#  define lua_str2number(s, p)  strtod((s), (p))
 #endif
 
 COMPAT53_API size_t lua_stringtonumber (lua_State *L, const char *s) {
