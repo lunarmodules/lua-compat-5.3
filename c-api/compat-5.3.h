@@ -316,6 +316,9 @@ COMPAT53_API void luaL_requiref (lua_State *L, const char *modname,
 #define lua_getuservalue(L, i) \
   (lua_getuservalue(L, i), lua_type(L, -1))
 
+#define lua_pushlstring(L, s, len) \
+  (((len) == 0) ? lua_pushlstring(L, "", 0) : lua_pushlstring(L, (s), (len)))
+
 #define lua_rawgetp(L, i, p) \
   (lua_rawgetp(L, i, p), lua_type(L, -1))
 
