@@ -172,9 +172,6 @@ COMPAT53_API void luaL_setmetatable (lua_State *L, const char *tname);
 #define luaL_testudata COMPAT53_CONCAT(COMPAT53_PREFIX, L_testudata)
 COMPAT53_API void *luaL_testudata (lua_State *L, int i, const char *tname);
 
-#define luaL_tolstring COMPAT53_CONCAT(COMPAT53_PREFIX, L_tolstring)
-COMPAT53_API const char *luaL_tolstring (lua_State *L, int idx, size_t *len);
-
 #define luaL_traceback COMPAT53_CONCAT(COMPAT53_PREFIX, L_traceback)
 COMPAT53_API void luaL_traceback (lua_State *L, lua_State *L1, const char *msg, int level);
 
@@ -285,6 +282,9 @@ COMPAT53_API void lua_seti (lua_State *L, int index, lua_Integer i);
 
 #define lua_stringtonumber COMPAT53_CONCAT(COMPAT53_PREFIX, _stringtonumber)
 COMPAT53_API size_t lua_stringtonumber (lua_State *L, const char *s);
+
+#define luaL_tolstring COMPAT53_CONCAT(COMPAT53_PREFIX, L_tolstring)
+COMPAT53_API const char *luaL_tolstring (lua_State *L, int idx, size_t *len);
 
 #define luaL_getmetafield(L, o, e) \
   (luaL_getmetafield(L, (o), (e)) ? lua_type(L, -1) : LUA_TNIL)
