@@ -110,7 +110,7 @@ COMPAT53_API void lua_len (lua_State *L, int i) {
     case LUA_TUSERDATA:
       if (luaL_callmeta(L, i, "__len"))
         break;
-      /* maybe fall through */
+      /* FALLTHROUGH */
     default:
       luaL_error(L, "attempt to get length of a %s value",
                  lua_typename(L, lua_type(L, i)));
