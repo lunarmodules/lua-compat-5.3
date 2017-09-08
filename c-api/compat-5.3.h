@@ -186,6 +186,9 @@ COMPAT53_API int luaL_execresult (lua_State *L, int stat);
 #define lua_pcallk(L, na, nr, err, ctx, cont) \
   ((void)(ctx), (void)(cont), lua_pcall((L), (na), (nr), (err)))
 
+#define lua_resume(L, from, nargs) \
+  ((void)(from), lua_resume((L), (nargs)))
+
 #define luaL_buffinit COMPAT53_CONCAT(COMPAT53_PREFIX, _buffinit_53)
 COMPAT53_API void luaL_buffinit (lua_State *L, luaL_Buffer_53 *B);
 
