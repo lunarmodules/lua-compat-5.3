@@ -142,6 +142,7 @@ For Lua 5.1 additionally:
 For Lua 5.1 additionally:
 * `LUA_OK`
 * `LUA_OP*` macros for `lua_arith` and `lua_compare`
+* `LUA_FILEHANDLE`
 * `lua_Unsigned`
 * `lua_absindex`
 * `lua_arith` (see [here][19])

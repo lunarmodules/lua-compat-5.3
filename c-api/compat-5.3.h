@@ -87,6 +87,9 @@ extern "C" {
 #ifndef LUA_OPLE
 #  define LUA_OPLE 2
 #endif
+#ifndef LUA_FILEHANDLE
+#  define LUA_FILEHANDLE "FILE*"
+#endif
 
 typedef size_t lua_Unsigned;
 
