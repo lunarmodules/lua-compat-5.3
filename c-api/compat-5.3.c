@@ -358,7 +358,7 @@ COMPAT53_API int luaL_fileresult (lua_State *L, int stat, const char *fname) {
     lua_pushnil(L);
 #if defined(__GLIBC__) || defined(_POSIX_VERSION) || defined(__APPLE__) || (!defined (__MINGW32__) && defined(__GNUC__) && (__GNUC__ < 6))
     /* use strerror_r here, because it's available on these specific platforms */
-    char buf[512] = {};
+    char buf[512] = {0};
 #if ((defined(_POSIX_C_SOURCE) && _POSIX_C_SOURCE >= 200112L) || (defined(_XOPEN_SOURCE) || _XOPEN_SOURCE >= 600)) && (!defined(_GNU_SOURCE) || !_GNU_SOURCE)
     /* XSI Compliant */
     strerror_r(en, buf, 512);
@@ -371,7 +371,7 @@ COMPAT53_API int luaL_fileresult (lua_State *L, int stat, const char *fname) {
     /* for MSVC and other C11 implementations, use strerror_s 
      * since it's provided by default by the libraries 
 	*/
-    char buf[512] = {};
+    char buf[512] = {0};
     strerror_s(buf, 512, en);
     s = buf;
 #else
