@@ -457,8 +457,10 @@ COMPAT53_API int luaL_loadfilex(lua_State *L, const char *filename, const char *
   allowbinary = mode[0] == 'b'; 
   allowtext = mode[0] == 't';
   if (modesize > 1) {
-    allowbinary = mode[1] == 'b';
-    allowtext = mode[1] == 't';
+    // manual only says "t", "b", or "bt", but tests against 
+    // Lua 5.2 and 5.3 show that "tb" is also allowed
+    allowbinary = allowbinary || mode[1] == 'b';
+    allowtext = allowtext || mode[1] == 't';
   }
 
   if (!allowbinary || !allowtext) {
@@ -467,7 +469,7 @@ COMPAT53_API int luaL_loadfilex(lua_State *L, const char *filename, const char *
   }
   else if (allowbinary && allowtext) {
      // both modes allowed: just pass it through
-     luaL_loadfile(L, filename);
+     return luaL_loadfile(L, filename);
   }
   // otherwise, we have to check manually ourselves
 #if defined(_MSC_VER)
@@ -501,8 +503,6 @@ COMPAT53_API int luaL_loadfilex(lua_State *L, const char *filename, const char *
 
 COMPAT53_API int luaL_loadbufferx(lua_State *L, const char *buff, size_t sz, const char *name, const char *mode) {
   size_t modesize;
-  FILE* fp;
-  errno_t err
   int allowbinary = 0;
   int allowtext = 0;
   if (mode == NULL) {
@@ -520,8 +520,10 @@ COMPAT53_API int luaL_loadbufferx(lua_State *L, const char *buff, size_t sz, con
   allowbinary = mode[0] == 'b'; 
   allowtext = mode[0] == 't';
   if (modesize > 1) {
-    allowbinary = mode[1] == 'b';
-    allowtext = mode[1] == 't';
+    // manual only says "t", "b", or "bt", but tests against 
+    // Lua 5.2 and 5.3 show that "tb" is also allowed
+    allowbinary = allowbinary || mode[1] == 'b';
+    allowtext = allowtext || mode[1] == 't';
   }
 
   if (!allowbinary || !allowtext) {
@@ -530,7 +532,7 @@ COMPAT53_API int luaL_loadbufferx(lua_State *L, const char *buff, size_t sz, con
   }
   else if (allowbinary && allowtext) {
      // both modes allowed: just pass it through
-     luaL_loadbuffer(L, buff, sz, name);
+     return luaL_loadbuffer(L, buff, sz, name);
   }
   // otherwise, we have to check manually ourselves
   if (allowbinary) {
