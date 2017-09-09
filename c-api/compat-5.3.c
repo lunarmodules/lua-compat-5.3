@@ -26,41 +26,6 @@ struct compat53_f_parser_buffer {
   char buffer[COMPAT53_LUA_FILE_BUFFER_SIZE];
 };
 
-#if defined(__GNUC__) && (__GNUC__ < 6)  && defined(__MINGW32__)
-/* MinGW 5.x.x and below
- * So as #485 in https://github.com/ThePhD/sol2/issues indicates, 
- * MinGW doesn't have this function
- * time to cover for C's standard library. again
-*/
-static int strerror_r(int errnum, char *buf, size_t len) {
-	// did we get a crap buffer?
-	if (buf == NULL) {
-		// considered a range error
-		// write errno, then return
-		errno = ERANGE;
-		return ERANGE;
-	}
-	//
-	if ((errnum < 0) || (errnum >= sys_nerr)) {
-		// failure
-		snprintf(buf, len, "unknown error: %d", errnum);
-		// write errno, then return
-		errno = EINVAL;
-		return EINVAL;
-	}
-	char* hopeitsthreadlocal = strerror(errnum);
-	if (snprintf(buf, len, "%s", hopeitsthreadlocal) >= (ptrdiff_t)len) {
-		// if this triggers we attempted to overwrite the buffer
-		// how fun
-		errno = ERANGE;
-		return ERANGE;
-	}
-
-	return 0;
-}
-#endif // MinGW 5.3.x and below missing strerror_r/strerror_s
-
-
 
 COMPAT53_API int lua_absindex (lua_State *L, int i) {
   if (i < 0 && i > LUA_REGISTRYINDEX)
@@ -391,14 +356,22 @@ COMPAT53_API int luaL_fileresult (lua_State *L, int stat, const char *fname) {
   }
   else {
     lua_pushnil(L);
-#if defined(__GLIBC__) || defined(_POSIX_VERSION) || defined(__APPLE__) || (defined(__GNUC__) && (__GNUC__ < 6) && defined (__MINGW32__))
+#if defined(__GLIBC__) || defined(_POSIX_VERSION) || defined(__APPLE__) || (!defined (__MINGW32__) && defined(__GNUC__) && (__GNUC__ < 6))
     /* use strerror_r here, because it's available on these specific platforms */
-    char buf[512];
+    char buf[512] = {};
+#if ((defined(_POSIX_C_SOURCE) && _POSIX_C_SOURCE >= 200112L) || (defined(_XOPEN_SOURCE) || _XOPEN_SOURCE >= 600)) && (!defined(_GNU_SOURCE) || !_GNU_SOURCE)
+    /* XSI Compliant */
     strerror_r(en, buf, 512);
     s = buf;
-#elif defined(_MSC_VER)
-    /* for MSVC and others, use strerror_s since it's provided by default by the libraries */
-    char buf[512];
+#else
+	/* GNU-specific which returns const char* */
+    s = strerror_r(en, buf, 512);
+#endif
+#elif defined(_MSC_VER) || (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L)
+    /* for MSVC and other C11 implementations, use strerror_s 
+     * since it's provided by default by the libraries 
+	*/
+    char buf[512] = {};
     strerror_s(buf, 512, en);
     s = buf;
 #else
