@@ -27,9 +27,11 @@ struct compat53_f_parser_buffer {
 };
 
 #if defined(__GNUC__) && (__GNUC__ < 6)  && defined(__MINGW32__)
-// MinGW 5.x.x and below
-// So as #485 indicates, MinGW doesn't have this function of 5.3 of MinGW
-// time to cover for C's standard library. again
+/* MinGW 5.x.x and below
+ * So as #485 in https://github.com/ThePhD/sol2/issues indicates, 
+ * MinGW doesn't have this function
+ * time to cover for C's standard library. again
+*/
 static int strerror_r(int errnum, char *buf, size_t len) {
 	// did we get a crap buffer?
 	if (buf == NULL) {
@@ -46,17 +48,6 @@ static int strerror_r(int errnum, char *buf, size_t len) {
 		errno = EINVAL;
 		return EINVAL;
 	}
-	// this is technically thread unsafe if `strerror` doesn't use threadlocal storage
-	// 
-	// pthreads isn't guaranteed either
-	// Now. The stdc lib devs probably use thread_local on their stuff
-	// but just in case, we'll do this here to be super safe
-	// this should protect us from data in-fighting across threads
-#if defined(_MSC_VER) defined(__BORLANDC__)
-	__declspec(thread) 
-#else
-	__thread 
-#endif // VC++ vs.everyone else
 	char* hopeitsthreadlocal = strerror(errnum);
 	if (snprintf(buf, len, "%s", hopeitsthreadlocal) >= (ptrdiff_t)len) {
 		// if this triggers we attempted to overwrite the buffer
@@ -401,16 +392,22 @@ COMPAT53_API int luaL_fileresult (lua_State *L, int stat, const char *fname) {
   else {
     lua_pushnil(L);
 #if defined(__GLIBC__) || defined(_POSIX_VERSION) || defined(__APPLE__) || (defined(__GNUC__) && (__GNUC__ < 6) && defined (__MINGW32__))
-    // use strerror_r here, because it's available on these specific platforms
+    /* use strerror_r here, because it's available on these specific platforms */
     char buf[512];
-    strerror_r(en, buf, 1024);
+    strerror_r(en, buf, 512);
     s = buf;
 #elif defined(_MSC_VER)
-    // for MSVC and others, use strerror_s since it's provided by default by the libraries
+    /* for MSVC and others, use strerror_s since it's provided by default by the libraries */
     char buf[512];
-    strerror_s(buf, 1024, en);
+    strerror_s(buf, 512, en);
     s = buf;
 #else
+    /* fallback, but
+     * strerror is not guaranteed to be threadsafe due to modifying
+     * errno itself and some impls not locking a static buffer for it
+     * ... but it works in 99% of cases, so I don't need the reason to stop
+     * the train now
+     */ 
     s = strerror(en);
 #endif
     if (fname)
@@ -422,125 +419,85 @@ COMPAT53_API int luaL_fileresult (lua_State *L, int stat, const char *fname) {
   }
 }
 
+
 static const char* compat53_f_parser_handler (lua_State *L, void *data, size_t *size) {
   struct compat53_f_parser_buffer *p = (struct compat53_f_parser_buffer*)data;
   size_t readcount = fread(p->buffer + p->start, sizeof(*p->buffer), sizeof(p->buffer), p->file);
-  if (ferror(p->file) != 0) {
+  if (ferror(p->file) != 0 || feof(p->file) != 0) {
     *size = 0;
     return NULL;
   }
+  *size = readcount + p->start;
   p->start = 0;
-  *size = readcount;
   return p->buffer;
 }
 
-COMPAT53_API int luaL_loadfilex(lua_State *L, const char *filename, const char *mode) {
-  size_t modesize;
-  FILE* fp;
-  errno_t err;
-  int c;
-  int returnvalue;
-  int allowbinary = 0;
-  int allowtext = 0;
-  if (mode == NULL) {
-    mode = "bt";
-    modesize = 2;
-  }
-  else {
-    modesize = strlen(mode);
-  }
-  if (modesize < 1) {
-    // mode is an empty string: boost it up
-    mode = "bt";
-    modesize = 2;
-  }
-  allowbinary = mode[0] == 'b'; 
-  allowtext = mode[0] == 't';
-  if (modesize > 1) {
-    // manual only says "t", "b", or "bt", but tests against 
-    // Lua 5.2 and 5.3 show that "tb" is also allowed
-    allowbinary = allowbinary || mode[1] == 'b';
-    allowtext = allowtext || mode[1] == 't';
-  }
 
-  if (!allowbinary || !allowtext) {
-    // invalid string: toss it out
-    return LUA_ERRFILE;
+static int checkmode (lua_State *L, const char *mode, const char *modename, int err) {
+  if (mode && strchr(mode, modename[0]) == NULL) {
+    lua_pushfstring(L, "attempt to load a %s chunk (mode is '%s')", modename, mode);
+    return err;
   }
-  else if (allowbinary && allowtext) {
-     // both modes allowed: just pass it through
-     return luaL_loadfile(L, filename);
-  }
-  // otherwise, we have to check manually ourselves
+  return LUA_OK;
+}
+
+
+COMPAT53_API int luaL_loadfilex (lua_State *L, const char *filename, const char *mode) {
+  FILE* fp;
+  int err;
+  int c;
+  int status = LUA_OK;
 #if defined(_MSC_VER)
   err = fopen_s(&fp, filename, "rb");
   if (err != 0) {
     fclose(fp);
+    lua_pushfstring(L, "cannot open file '%s'", filename);
     return LUA_ERRFILE;
   }
-#else // fopen error on Visual C
+#else /* fopen error on Visual C */
   fp = fopen(filename, "rb");
   if (fp == NULL) {
     fclose(fp);
+    lua_pushfstring(L, "cannot open file '%s'", filename);
     return LUA_ERRFILE;
   }
-#endif // fopen error on Visual C
+#endif /* fopen error on Visual C */
   c = fgetc(fp);
-  if (allowbinary) {
-    // if it's not a binary file, error it
-    if (c != '\x1b') {
-      fclose(fp);
-      return LUA_ERRSYNTAX; // bad syntax includes signature?
-    }
+  if (ferror(fp) != 0) {
+    /* can't read even a single character */
+    fclose(fp);
+    lua_pushfstring(L, "cannot read from file '%s'", filename);
+    return LUA_ERRFILE;
+  }
+  if (c == '\x1b') {
+    status = checkmode(L, mode, "binary", LUA_ERRFILE);
+  }
+  else {
+    status = checkmode(L, mode, "text", LUA_ERRFILE);
+  }
+  if (status != LUA_OK) {
+    fclose(fp);
+    return status;
   }
   struct compat53_f_parser_buffer fbuf;
   fbuf.file = fp;
-  fbuf.start = allowbinary != 0 ? 1 : 0;
-  returnvalue = lua_load(L, &compat53_f_parser_handler, &fbuf, filename);
+  fbuf.start = 1;
+  status = lua_load(L, &compat53_f_parser_handler, &fbuf, filename);
   fclose(fp);
-  return returnvalue;
+  return status;
 }
 
-COMPAT53_API int luaL_loadbufferx(lua_State *L, const char *buff, size_t sz, const char *name, const char *mode) {
-  size_t modesize;
-  int allowbinary = 0;
-  int allowtext = 0;
-  if (mode == NULL) {
-    mode = "bt";
-    modesize = 2;
+
+COMPAT53_API int luaL_loadbufferx (lua_State *L, const char *buff, size_t sz, const char *name, const char *mode) {
+  int status = LUA_OK;
+  if (buff[0] == '\x1b') {
+    status = checkmode(L, mode, "binary", LUA_ERRSYNTAX);
   }
   else {
-    modesize = strlen(mode);
+    status = checkmode(L, mode, "text", LUA_ERRSYNTAX);
   }
-  if (modesize < 1) {
-    // mode is an empty string: boost it up
-    mode = "bt";
-    modesize = 2;
-  }
-  allowbinary = mode[0] == 'b'; 
-  allowtext = mode[0] == 't';
-  if (modesize > 1) {
-    // manual only says "t", "b", or "bt", but tests against 
-    // Lua 5.2 and 5.3 show that "tb" is also allowed
-    allowbinary = allowbinary || mode[1] == 'b';
-    allowtext = allowtext || mode[1] == 't';
-  }
-
-  if (!allowbinary || !allowtext) {
-    // invalid string: toss it out
-    return LUA_ERRSYNTAX;
-  }
-  else if (allowbinary && allowtext) {
-     // both modes allowed: just pass it through
-     return luaL_loadbuffer(L, buff, sz, name);
-  }
-  // otherwise, we have to check manually ourselves
-  if (allowbinary) {
-    // if it's not a binary file, error it
-    if (sz > 0 && buff[0] != '\x1b') {
-      return LUA_ERRSYNTAX;
-    }
-  }
+  if (status != LUA_OK)
+    return status;
   return luaL_loadbuffer(L, buff, sz, name);
 }
 

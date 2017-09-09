@@ -86,12 +86,18 @@ extern "C" {
 #  define LUA_OPLE 2
 #endif
 
-// LuaJIT/Lua 5.1 does not have the updated 
-// error codes for thread status/function returns (but some patched versions do)
-// define it only if it's not found
+/* LuaJIT/Lua 5.1 does not have the updated 
+ * error codes for thread status/function returns (but some patched versions do)
+ * define it only if it's not found
+ */
 #if !defined(LUA_ERRGCMM)
-#  define LUA_ERRGCMM (LUA_ERRERR + 2) // + 2 because in some version something is already defined at LUA_ERRERR + 1
-#endif // LUA_ERRGCMM define
+/* Use + 2 because in some versions of Lua (Lua 5.1) 
+ * LUA_ERRFILE is defined as (LUA_ERRERR+1)
+ * so we need to avoid it (LuaJIT might have something at this
+ * integer value too)
+ */
+#  define LUA_ERRGCMM (LUA_ERRERR + 2)
+#endif /* LUA_ERRGCMM define */
 
 typedef size_t lua_Unsigned;
 
