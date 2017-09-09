@@ -3,6 +3,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <errno.h>
+#include <stdio.h>
 #include "compat-5.3.h"
 
 /* don't compile it again if it already is included via compat53.h */
@@ -13,6 +14,60 @@
 
 /* definitions for Lua 5.1 only */
 #if defined(LUA_VERSION_NUM) && LUA_VERSION_NUM == 501
+
+#ifndef COMPAT53_LUA_FILE_BUFFER_SIZE
+#define COMPAT53_LUA_FILE_BUFFER_SIZE 4096
+#endif // Lua File Buffer Size
+
+#define f_parser_buffer COMPAT53_CONCAT(COMPAT53_PREFIX, f_parser_buffer)
+struct f_parser_buffer {
+  FILE* file;
+  char buffer[COMPAT53_LUA_FILE_BUFFER_SIZE];
+};
+
+#if defined(__GNUC__) && (__GNUC__ < 6)  && defined(__MINGW32__)
+// MinGW 5.x.x and below
+// So as #485 indicates, MinGW doesn't have this function of 5.3 of MinGW
+// time to cover for C's standard library. again
+static int strerror_r(int errnum, char *buf, size_t len) {
+	// did we get a crap buffer?
+	if (buf == NULL) {
+		// considered a range error
+		// write errno, then return
+		errno = ERANGE;
+		return ERANGE;
+	}
+	//
+	if ((errnum < 0) || (errnum >= sys_nerr)) {
+		// failure
+		snprintf(buf, len, "unknown error: %d", errnum);
+		// write errno, then return
+		errno = EINVAL;
+		return EINVAL;
+	}
+	// this is technically thread unsafe if `strerror` doesn't use threadlocal storage
+	// 
+	// pthreads isn't guaranteed either
+	// Now. The stdc lib devs probably use thread_local on their stuff
+	// but just in case, we'll do this here to be super safe
+	// this should protect us from data in-fighting across threads
+#if defined(_MSC_VER) defined(__BORLANDC__)
+	__declspec(thread) 
+#else
+	__thread 
+#endif // VC++ vs.everyone else
+	char* hopeitsthreadlocal = strerror(errnum);
+	if (snprintf(buf, len, "%s", hopeitsthreadlocal) >= (ptrdiff_t)len) {
+		// if this triggers we attempted to overwrite the buffer
+		// how fun
+		errno = ERANGE;
+		return ERANGE;
+	}
+
+	return 0;
+}
+#endif // MinGW 5.3.x and below missing strerror_r/strerror_s
+
 
 
 COMPAT53_API int lua_absindex (lua_State *L, int i) {
@@ -101,11 +156,11 @@ COMPAT53_API void lua_copy (lua_State *L, int from, int to) {
 COMPAT53_API void lua_len (lua_State *L, int i) {
   switch (lua_type(L, i)) {
     case LUA_TSTRING:
-      lua_pushnumber(L, (lua_Integer)lua_objlen(L, i));
+      lua_pushnumber(L, (lua_Number)lua_objlen(L, i));
       break;
     case LUA_TTABLE:
       if (!luaL_callmeta(L, i, "__len"))
-        lua_pushnumber(L, (lua_Integer)lua_objlen(L, i));
+        lua_pushnumber(L, (lua_Number)lua_objlen(L, i));
       break;
     case LUA_TUSERDATA:
       if (luaL_callmeta(L, i, "__len"))
@@ -336,6 +391,7 @@ COMPAT53_API void luaL_traceback (lua_State *L, lua_State *L1,
 
 
 COMPAT53_API int luaL_fileresult (lua_State *L, int stat, const char *fname) {
+  const char* s = NULL;
   int en = errno;  /* calls to Lua API may change this value */
   if (stat) {
     lua_pushboolean(L, 1);
@@ -343,15 +399,131 @@ COMPAT53_API int luaL_fileresult (lua_State *L, int stat, const char *fname) {
   }
   else {
     lua_pushnil(L);
+#if defined(__GLIBC__) || defined(_POSIX_VERSION) || defined(__APPLE__) || (defined(__GNUC__) && (__GNUC__ < 6) && defined (__MINGW32__))
+    // use strerror_r here, because it's available on these specific platforms
+    char buf[512];
+    strerror_r(en, buf, 1024);
+    s = buf;
+#elif defined(_MSC_VER)
+    // for MSVC and others, use strerror_s since it's provided by default by the libraries
+    char buf[512];
+    strerror_s(buf, 1024, en);
+    s = buf;
+#else
+    s = strerror(en);
+#endif
     if (fname)
-      lua_pushfstring(L, "%s: %s", fname, strerror(en));
+      lua_pushfstring(L, "%s: %s", fname, s);
     else
-      lua_pushstring(L, strerror(en));
+      lua_pushstring(L, s);
     lua_pushnumber(L, (lua_Number)en);
     return 3;
   }
 }
 
+static const char* compat53_f_parser_handler (lua_State *L, void *data, size_t *size) {
+  struct f_parser_buffer *p = (struct f_parser_buffer*)data;
+  size_t readcount = fread(p->buffer, sizeof(*p->buffer), sizeof(p->buffer), p->file);
+  if (ferror(p->file) != 0) {
+    *size = 0;
+    return NULL;
+  }
+  *size = readcount;
+  return p->buffer;
+}
+
+COMPAT53_API int luaL_loadfilex(lua_State *L, const char *filename, const char *mode) {
+  size_t modesize;
+  int allowbinary = 0;
+  int allowtext = 0;
+  if (mode == NULL) {
+    mode = "bt";
+    modesize = 2;
+  }
+  else {
+    modesize = strlen(mode);
+  }
+  if (modesize < 1) {
+    // mode is an empty string: boost it up
+    mode = "bt";
+    modesize = 2;
+  }
+  allowbinary = mode[0] == 'b' || (modesize > 1 && mode[1] == 'b');
+  allowtext = mode[0] == 't' || (modesize > 1 && mode[1] == 't');
+  if (!allowbinary || !allowtext) {
+    // invalid string: toss it out?
+    return LUA_ERRFILE;
+  }
+  else if (allowbinary && allowtext) {
+     // both modes allowed: just pass it through
+     luaL_loadfile(L, filename);
+  }
+  // otherwise, we have to check manually ourselves
+#if defined(_MSC_VER)
+  FILE* fp;
+  errno_t err = fopen_s(&fp, filename, "rb");
+  if (err != 0) {
+    fclose(fp);
+    return LUA_ERRFILE;
+  }
+#else // fopen error on Visual C
+  FILE* fp = fopen(filename, "rb");
+  if (fp == NULL) {
+    fclose(fp);
+    return LUA_ERRFILE;
+  }
+#endif // fopen error on Visual C
+  int c = fgetc(fp);
+  if (allowbinary) {
+    // if it's not a binary file, error it
+    if (c != '\x1b') {
+      fclose(fp);
+      return LUA_ERRSYNTAX; // bad syntax includes signature?
+    }
+    ungetc(c, fp);
+  }
+  struct f_parser_buffer fbuf;
+  fbuf.file = fp;
+  int returnvalue = lua_load(L, &compat53_f_parser_handler, &fbuf, filename);
+  fclose(fp);
+  return returnvalue;
+}
+
+COMPAT53_API int luaL_loadbufferx(lua_State *L, const char *buff, size_t sz, const char *name, const char *mode) {
+  size_t modesize;
+  int allowbinary = 0;
+  int allowtext = 0;
+  if (mode == NULL) {
+    mode = "bt";
+    modesize = 2;
+  }
+  else {
+    modesize = strlen(mode);
+  }
+  if (modesize < 1) {
+    // mode is an empty string: boost it up
+    mode = "bt";
+    modesize = 2;
+  }
+  allowbinary = mode[0] == 'b' || (modesize > 1 && mode[1] == 'b');
+  allowtext = mode[0] == 't' || (modesize > 1 && mode[1] == 't');
+  if (!allowbinary || !allowtext) {
+    // invalid string: toss it out?
+    return LUA_ERRSYNTAX;
+  }
+  else if (allowbinary && allowtext) {
+     // both modes allowed: just pass it through
+     luaL_loadbuffer(L, buff, sz, name);
+  }
+  // otherwise, we have to check manually ourselves
+  if (allowbinary) {
+    // if it's not a binary file, error it
+    if (sz > 0 && buff[0] != '\x1b') {
+      return LUA_ERRSYNTAX; // bad syntax includes signature?
+    }
+  }
+  return luaL_loadbuffer(L, buff, sz, name);
+}
 
 #if !defined(l_inspectstat) && \
     (defined(unix) || defined(__unix) || defined(__unix__) || \

@@ -50,8 +50,6 @@ extern "C" {
  * lua_upvaluejoin
  * lua_version
  * lua_yieldk
- * luaL_loadbufferx
- * luaL_loadfilex
  */
 
 #ifndef LUA_OK
@@ -87,6 +85,13 @@ extern "C" {
 #ifndef LUA_OPLE
 #  define LUA_OPLE 2
 #endif
+
+// LuaJIT/Lua 5.1 does not have the updated 
+// error codes for thread status/function returns (but some patched versions do)
+// define it only if it's not found
+#if !defined(LUA_ERRGCMM)
+#  define LUA_ERRGCMM (LUA_ERRERR + 2) // + 2 because in some version something is already defined at LUA_ERRERR + 1
+#endif // LUA_ERRGCMM define
 
 typedef size_t lua_Unsigned;
 
@@ -153,6 +158,12 @@ COMPAT53_API lua_Number lua_tonumberx (lua_State *L, int i, int *isnum);
 
 #define luaL_checkversion COMPAT53_CONCAT(COMPAT53_PREFIX, L_checkversion)
 COMPAT53_API void luaL_checkversion (lua_State *L);
+
+#define luaL_loadfilex COMPAT53_CONCAT(COMPAT53_PREFIX, L_loadfilex)
+COMPAT53_API void luaL_loadfilex (lua_State *L);
+
+#define luaL_loadbufferx COMPAT53_CONCAT(COMPAT53_PREFIX, L_loadbufferx)
+COMPAT53_API void luaL_loadbufferx (lua_State *L);
 
 #define luaL_checkstack COMPAT53_CONCAT(COMPAT53_PREFIX, L_checkstack_53)
 COMPAT53_API void luaL_checkstack (lua_State *L, int sp, const char *msg);
