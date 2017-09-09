@@ -19,9 +19,10 @@
 #define COMPAT53_LUA_FILE_BUFFER_SIZE 4096
 #endif // Lua File Buffer Size
 
-#define f_parser_buffer COMPAT53_CONCAT(COMPAT53_PREFIX, f_parser_buffer)
-struct f_parser_buffer {
+#define compat53_f_parser_buffer COMPAT53_CONCAT(COMPAT53_PREFIX, compat53_f_parser_buffer)
+struct compat53_f_parser_buffer {
   FILE* file;
+  size_t start;
   char buffer[COMPAT53_LUA_FILE_BUFFER_SIZE];
 };
 
@@ -422,18 +423,23 @@ COMPAT53_API int luaL_fileresult (lua_State *L, int stat, const char *fname) {
 }
 
 static const char* compat53_f_parser_handler (lua_State *L, void *data, size_t *size) {
-  struct f_parser_buffer *p = (struct f_parser_buffer*)data;
-  size_t readcount = fread(p->buffer, sizeof(*p->buffer), sizeof(p->buffer), p->file);
+  struct compat53_f_parser_buffer *p = (struct compat53_f_parser_buffer*)data;
+  size_t readcount = fread(p->buffer + p->start, sizeof(*p->buffer), sizeof(p->buffer), p->file);
   if (ferror(p->file) != 0) {
     *size = 0;
     return NULL;
   }
+  p->start = 0;
   *size = readcount;
   return p->buffer;
 }
 
 COMPAT53_API int luaL_loadfilex(lua_State *L, const char *filename, const char *mode) {
   size_t modesize;
+  FILE* fp;
+  errno_t err;
+  int c;
+  int returnvalue;
   int allowbinary = 0;
   int allowtext = 0;
   if (mode == NULL) {
@@ -448,10 +454,15 @@ COMPAT53_API int luaL_loadfilex(lua_State *L, const char *filename, const char *
     mode = "bt";
     modesize = 2;
   }
-  allowbinary = mode[0] == 'b' || (modesize > 1 && mode[1] == 'b');
-  allowtext = mode[0] == 't' || (modesize > 1 && mode[1] == 't');
+  allowbinary = mode[0] == 'b'; 
+  allowtext = mode[0] == 't';
+  if (modesize > 1) {
+    allowbinary = mode[1] == 'b';
+    allowtext = mode[1] == 't';
+  }
+
   if (!allowbinary || !allowtext) {
-    // invalid string: toss it out?
+    // invalid string: toss it out
     return LUA_ERRFILE;
   }
   else if (allowbinary && allowtext) {
@@ -460,37 +471,38 @@ COMPAT53_API int luaL_loadfilex(lua_State *L, const char *filename, const char *
   }
   // otherwise, we have to check manually ourselves
 #if defined(_MSC_VER)
-  FILE* fp;
-  errno_t err = fopen_s(&fp, filename, "rb");
+  err = fopen_s(&fp, filename, "rb");
   if (err != 0) {
     fclose(fp);
     return LUA_ERRFILE;
   }
 #else // fopen error on Visual C
-  FILE* fp = fopen(filename, "rb");
+  fp = fopen(filename, "rb");
   if (fp == NULL) {
     fclose(fp);
     return LUA_ERRFILE;
   }
 #endif // fopen error on Visual C
-  int c = fgetc(fp);
+  c = fgetc(fp);
   if (allowbinary) {
     // if it's not a binary file, error it
     if (c != '\x1b') {
       fclose(fp);
       return LUA_ERRSYNTAX; // bad syntax includes signature?
     }
-    ungetc(c, fp);
   }
-  struct f_parser_buffer fbuf;
+  struct compat53_f_parser_buffer fbuf;
   fbuf.file = fp;
-  int returnvalue = lua_load(L, &compat53_f_parser_handler, &fbuf, filename);
+  fbuf.start = allowbinary != 0 ? 1 : 0;
+  returnvalue = lua_load(L, &compat53_f_parser_handler, &fbuf, filename);
   fclose(fp);
   return returnvalue;
 }
 
 COMPAT53_API int luaL_loadbufferx(lua_State *L, const char *buff, size_t sz, const char *name, const char *mode) {
   size_t modesize;
+  FILE* fp;
+  errno_t err
   int allowbinary = 0;
   int allowtext = 0;
   if (mode == NULL) {
@@ -505,10 +517,15 @@ COMPAT53_API int luaL_loadbufferx(lua_State *L, const char *buff, size_t sz, con
     mode = "bt";
     modesize = 2;
   }
-  allowbinary = mode[0] == 'b' || (modesize > 1 && mode[1] == 'b');
-  allowtext = mode[0] == 't' || (modesize > 1 && mode[1] == 't');
+  allowbinary = mode[0] == 'b'; 
+  allowtext = mode[0] == 't';
+  if (modesize > 1) {
+    allowbinary = mode[1] == 'b';
+    allowtext = mode[1] == 't';
+  }
+
   if (!allowbinary || !allowtext) {
-    // invalid string: toss it out?
+    // invalid string: toss it out
     return LUA_ERRSYNTAX;
   }
   else if (allowbinary && allowtext) {
@@ -519,7 +536,7 @@ COMPAT53_API int luaL_loadbufferx(lua_State *L, const char *buff, size_t sz, con
   if (allowbinary) {
     // if it's not a binary file, error it
     if (sz > 0 && buff[0] != '\x1b') {
-      return LUA_ERRSYNTAX; // bad syntax includes signature?
+      return LUA_ERRSYNTAX;
     }
   }
   return luaL_loadbuffer(L, buff, sz, name);
