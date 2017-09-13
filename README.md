@@ -142,6 +142,7 @@ For Lua 5.1 additionally:
 
 For Lua 5.1 additionally:
 * `LUA_OK`
+* `LUA_ERRGCMM`
 * `LUA_OP*` macros for `lua_arith` and `lua_compare`
 * `lua_Unsigned`
 * `lua_absindex`
@@ -158,6 +159,8 @@ For Lua 5.1 additionally:
 * `luaL_traceback`
 * `luaL_execresult`
 * `luaL_fileresult`
+* `luaL_loadfilex`
+* `luaL_loadbufferx`
 * `luaL_checkversion` (with empty body, only to avoid compile errors,
   see [here][20])
 * `luaL_tolstring`
@@ -166,6 +169,7 @@ For Lua 5.1 additionally:
 * `lua_pushunsigned`, `lua_tounsignedx`, `lua_tounsigned`,
   `luaL_checkunsigned`, `luaL_optunsigned`, if
   `LUA_COMPAT_APIINTCASTS` is defined.
+
 
 ## What's not implemented
 
@@ -185,8 +189,6 @@ For Lua 5.1 additionally:
   * `lua_upvaluejoin` (5.1)
   * `lua_version` (5.1)
   * `lua_yieldk` (5.1)
-  * `luaL_loadbufferx` (5.1)
-  * `luaL_loadfilex` (5.1)
 
 ## See also
 
