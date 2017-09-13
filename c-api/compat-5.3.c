@@ -25,7 +25,7 @@
 
 #if defined(_MSC_VER) && COMPAT53_FOPEN_NO_LOCK
 #include <share.h>
-#endif // VC++ _fsopen for share-allowed file read
+#endif /* VC++ _fsopen for share-allowed file read */
 
 #ifndef COMPAT53_HAVE_STRERROR_R
 #  if defined(__GLIBC__) || defined(_POSIX_VERSION) || defined(__APPLE__) || (!defined (__MINGW32__) && defined(__GNUC__) && (__GNUC__ < 6))
@@ -530,6 +530,11 @@ COMPAT53_API int luaL_loadfilex (lua_State *L, const char *filename, const char 
   else {
     lua_pushfstring(L, "@%s", filename);
 #if defined(_MSC_VER)
+	/* this code is here to stop a deprecation error that 
+	 * stops builds if a certain macro is defined
+	 * while normally not caring would be best, some 
+	 * header-only libraries and builds can't afford
+	 * to dictate this to the user*/
     /* a quick check shows that fopen_s this goes back to VS 2005, 
      * and _fsopen goes back to VS 2003 .NET, possibly even before that 
      * so we don't need to do any version number checks, 
@@ -537,7 +542,7 @@ COMPAT53_API int luaL_loadfilex (lua_State *L, const char *filename, const char 
      */
 
     /* TO USER: if you want the behavior of typical fopen_s/fopen, 
-     * which does lock the file on VC++, define the macro used below
+     * which does lock the file on VC++, define the macro used below to 0
 	*/
 #if COMPAT53_FOPEN_NO_LOCK
     lf.f = _fsopen(filename, "r", _SH_DENYNO); /* do not lock the file in any way */
