@@ -133,6 +133,7 @@ For Lua 5.1 additionally:
 * `lua_isinteger`
 * `lua_numbertointeger`
 * `lua_callk` and `lua_pcallk` (limited compatibility, see [here][14])
+* `lua_resume`
 * `lua_rawget` and `lua_rawgeti` (return values)
 * `lua_rawgetp` and `lua_rawsetp`
 * `luaL_requiref` (now checks `package.loaded` first)
@@ -141,6 +142,7 @@ For Lua 5.1 additionally:
 
 For Lua 5.1 additionally:
 * `LUA_OK`
+* `LUA_ERRGCMM`
 * `LUA_OP*` macros for `lua_arith` and `lua_compare`
 * `lua_Unsigned`
 * `lua_absindex`

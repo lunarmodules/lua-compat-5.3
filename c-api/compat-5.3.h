@@ -88,6 +88,19 @@ extern "C" {
 #  define LUA_OPLE 2
 #endif
 
+/* LuaJIT/Lua 5.1 does not have the updated 
+ * error codes for thread status/function returns (but some patched versions do)
+ * define it only if it's not found
+ */
+#if !defined(LUA_ERRGCMM)
+/* Use + 2 because in some versions of Lua (Lua 5.1) 
+ * LUA_ERRFILE is defined as (LUA_ERRERR+1)
+ * so we need to avoid it (LuaJIT might have something at this
+ * integer value too)
+ */
+#  define LUA_ERRGCMM (LUA_ERRERR + 2)
+#endif /* LUA_ERRGCMM define */
+
 typedef size_t lua_Unsigned;
 
 typedef struct luaL_Buffer_53 {
@@ -185,6 +198,9 @@ COMPAT53_API int luaL_execresult (lua_State *L, int stat);
   ((void)(ctx), (void)(cont), lua_call((L), (na), (nr)))
 #define lua_pcallk(L, na, nr, err, ctx, cont) \
   ((void)(ctx), (void)(cont), lua_pcall((L), (na), (nr), (err)))
+
+#define lua_resume(L, from, nargs) \
+  ((void)(from), lua_resume((L), (nargs)))
 
 #define luaL_buffinit COMPAT53_CONCAT(COMPAT53_PREFIX, _buffinit_53)
 COMPAT53_API void luaL_buffinit (lua_State *L, luaL_Buffer_53 *B);
