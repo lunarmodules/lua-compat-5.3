@@ -530,11 +530,11 @@ COMPAT53_API int luaL_loadfilex (lua_State *L, const char *filename, const char 
   else {
     lua_pushfstring(L, "@%s", filename);
 #if defined(_MSC_VER)
-	/* this code is here to stop a deprecation error that 
-	 * stops builds if a certain macro is defined
-	 * while normally not caring would be best, some 
-	 * header-only libraries and builds can't afford
-	 * to dictate this to the user*/
+    /* this code is here to stop a deprecation error that 
+     * stops builds if a certain macro is defined
+     * while normally not caring would be best, some 
+     * header-only libraries and builds can't afford
+     * to dictate this to the user*/
     /* a quick check shows that fopen_s this goes back to VS 2005, 
      * and _fsopen goes back to VS 2003 .NET, possibly even before that 
      * so we don't need to do any version number checks, 
