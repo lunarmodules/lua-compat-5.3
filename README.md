@@ -142,6 +142,7 @@ For Lua 5.1 additionally:
 
 For Lua 5.1 additionally:
 * `LUA_OK`
+* `LUA_ERRGCMM`
 * `LUA_OP*` macros for `lua_arith` and `lua_compare`
 * `lua_Unsigned`
 * `lua_absindex`
