@@ -274,6 +274,33 @@ static int test_exec (lua_State *L) {
   return luaL_execresult(L, system(cmd));
 }
 
+static int test_loadstring (lua_State *L) {
+  size_t len = 0;
+  char const* s = luaL_checklstring(L, 1, &len);
+  char const* mode = luaL_optstring(L, 2, "bt");
+  lua_pushinteger(L, luaL_loadbufferx(L, s, len, s, mode));
+  return 2;
+}
+
+static int test_loadfile (lua_State *L) {
+  char filename[L_tmpnam+1] = { 0 };
+  size_t len = 0;
+  char const* s = luaL_checklstring(L, 1, &len);
+  char const* mode = luaL_optstring(L, 2, "bt");
+  if (tmpnam(filename)) {
+    FILE* f = fopen(filename, "wb");
+    if (f) {
+      fwrite(s, 1, len, f);
+      fclose(f);
+      lua_pushinteger(L, luaL_loadfilex(L, filename, mode));
+      remove(filename);
+      return 2;
+    } else
+      remove(filename);
+  }
+  return 0;
+}
+
 
 static const luaL_Reg funcs[] = {
   { "isinteger", test_isinteger },
@@ -297,6 +324,8 @@ static const luaL_Reg funcs[] = {
   { "pushstring", test_pushstring },
   { "buffer", test_buffer },
   { "exec", test_exec },
+  { "loadstring", test_loadstring },
+  { "loadfile", test_loadfile },
   { NULL, NULL }
 };
 

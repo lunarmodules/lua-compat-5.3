@@ -447,7 +447,7 @@ COMPAT53_API int luaL_fileresult (lua_State *L, int stat, const char *fname) {
 
 static int compat53_checkmode (lua_State *L, const char *mode, const char *modename, int err) {
   if (mode && strchr(mode, modename[0]) == NULL) {
-    lua_pushfstring(L, "attempt to load a %s chunk when 'mode' is '%s'", modename, mode);
+    lua_pushfstring(L, "attempt to load a %s chunk (mode is '%s')", modename, mode);
     return err;
   }
   return LUA_OK;
@@ -475,17 +475,16 @@ static const char *compat53_reader (lua_State *L, void *ud, size_t *size) {
 
 
 COMPAT53_API int lua_load (lua_State *L, lua_Reader reader, void *data, const char *source, const char *mode) {
+  int status = LUA_OK;
   compat53_reader_data compat53_data = { reader, data, 1, 0, 0 };
   compat53_data.peeked_data = reader(L, data, &(compat53_data.peeked_data_size));
-  if (compat53_data.peeked_data && compat53_data.peeked_data_size) {
-    int status = LUA_OK;
-    if (compat53_data.peeked_data[0] == LUA_SIGNATURE[0])  /* binary file? */
-      status = compat53_checkmode(L, mode, "binary", LUA_ERRFILE);
-    else
-      status = compat53_checkmode(L, mode, "text", LUA_ERRFILE);
-    if (status != LUA_OK)
-      return status;
-  }
+  if (compat53_data.peeked_data && compat53_data.peeked_data_size &&
+      compat53_data.peeked_data[0] == LUA_SIGNATURE[0]) /* binary file? */
+      status = compat53_checkmode(L, mode, "binary", LUA_ERRSYNTAX);
+  else
+      status = compat53_checkmode(L, mode, "text", LUA_ERRSYNTAX);
+  if (status != LUA_OK)
+    return status;
   /* we need to call the original 5.1 version of lua_load! */
 #undef lua_load
   return lua_load(L, compat53_reader, &compat53_data, source);
