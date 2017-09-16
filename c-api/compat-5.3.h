@@ -174,6 +174,9 @@ COMPAT53_API lua_Number lua_tonumberx (lua_State *L, int i, int *isnum);
 #define luaL_checkversion COMPAT53_CONCAT(COMPAT53_PREFIX, L_checkversion)
 COMPAT53_API void luaL_checkversion (lua_State *L);
 
+#define lua_load COMPAT53_CONCAT(COMPAT53_PREFIX, _load_53)
+COMPAT53_API int lua_load (lua_State *L, lua_Reader reader, void *data, const char* source, const char* mode);
+
 #define luaL_loadfilex COMPAT53_CONCAT(COMPAT53_PREFIX, L_loadfilex)
 COMPAT53_API int luaL_loadfilex (lua_State *L, const char *filename, const char *mode);
 

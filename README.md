@@ -151,6 +151,7 @@ For Lua 5.1 additionally:
 * `lua_arith` (see [here][20])
 * `lua_compare`
 * `lua_len`, `lua_rawlen`, and `luaL_len`
+* `lua_load` (mode argument)
 * `lua_pushstring`, `lua_pushlstring` (return value)
 * `lua_copy`
 * `lua_pushglobaltable`
@@ -206,6 +207,8 @@ This package contains code written by:
 * Tomás Guisasola Gorham ([@tomasguisasola](http://github.com/tomasguisasola))
 * Hisham Muhammad ([@hishamhm](http://github.com/hishamhm))
 * Renato Maia ([@renatomaia](http://github.com/renatomaia))
+* [@ThePhD](http://github.com/ThePhD)
+* [@Daurnimator](http://github.com/Daurnimator)
 
 
   [1]: http://www.inf.puc-rio.br/~roberto/struct/
