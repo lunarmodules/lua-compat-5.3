@@ -144,9 +144,11 @@ For Lua 5.1 additionally:
 * `LUA_OK`
 * `LUA_ERRGCMM`
 * `LUA_OP*` macros for `lua_arith` and `lua_compare`
+* `LUA_FILEHANDLE`
 * `lua_Unsigned`
+* `luaL_Stream` (limited compatibility, see[here][19])
 * `lua_absindex`
-* `lua_arith` (see [here][19])
+* `lua_arith` (see [here][20])
 * `lua_compare`
 * `lua_len`, `lua_rawlen`, and `luaL_len`
 * `lua_pushstring`, `lua_pushlstring` (return value)
@@ -160,10 +162,10 @@ For Lua 5.1 additionally:
 * `luaL_execresult`
 * `luaL_fileresult`
 * `luaL_checkversion` (with empty body, only to avoid compile errors,
-  see [here][20])
+  see [here][21])
 * `luaL_tolstring`
 * `luaL_buffinitsize`, `luaL_prepbuffsize`, and `luaL_pushresultsize`
-  (see [here][21])
+  (see [here][22])
 * `lua_pushunsigned`, `lua_tounsignedx`, `lua_tounsigned`,
   `luaL_checkunsigned`, `luaL_optunsigned`, if
   `LUA_COMPAT_APIINTCASTS` is defined.
@@ -225,7 +227,8 @@ This package contains code written by:
   [17]: https://github.com/keplerproject/lua-compat-5.3/wiki/lua_setuservalue
   [18]: https://github.com/keplerproject/lua-compat-5.3/wiki/lua_stringtonumber
   [19]: https://github.com/keplerproject/lua-compat-5.3/wiki/lua_arith
-  [20]: https://github.com/keplerproject/lua-compat-5.3/wiki/luaL_checkversion
-  [21]: https://github.com/keplerproject/lua-compat-5.3/wiki/luaL_Buffer
-  [22]: https://github.com/keplerproject/lua-compat-5.3/wiki/coroutine.running
+  [20]: https://github.com/keplerproject/lua-compat-5.3/wiki/luaL_Stream
+  [21]: https://github.com/keplerproject/lua-compat-5.3/wiki/luaL_checkversion
+  [22]: https://github.com/keplerproject/lua-compat-5.3/wiki/luaL_Buffer
+  [23]: https://github.com/keplerproject/lua-compat-5.3/wiki/coroutine.running
 

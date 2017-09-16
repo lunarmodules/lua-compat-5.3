@@ -87,6 +87,9 @@ extern "C" {
 #ifndef LUA_OPLE
 #  define LUA_OPLE 2
 #endif
+#ifndef LUA_FILEHANDLE
+#  define LUA_FILEHANDLE "FILE*"
+#endif
 
 /* LuaJIT/Lua 5.1 does not have the updated 
  * error codes for thread status/function returns (but some patched versions do)
@@ -111,6 +114,15 @@ typedef struct luaL_Buffer_53 {
   lua_State *L2;
 } luaL_Buffer_53;
 #define luaL_Buffer luaL_Buffer_53
+
+/*
+ * In PUC-Rio 5.1, userdata is a simple FILE*
+ * In LuaJIT, it's a struct where the first member is a FILE*
+ * We can't support the `closef` member
+ */
+typedef struct luaL_Stream {
+  FILE *f;
+} luaL_Stream;
 
 #define lua_absindex COMPAT53_CONCAT(COMPAT53_PREFIX, _absindex)
 COMPAT53_API int lua_absindex (lua_State *L, int i);
