@@ -9,11 +9,13 @@ extern "C" {
 #endif
 #include <lua.h>
 #include <lauxlib.h>
+#include <lualib.h>
 #if defined(__cplusplus) && !defined(COMPAT53_LUA_CPP)
 }
 #endif
 
 
+#undef COMPAT53_INCLUDE_SOURCE
 #if defined(COMPAT53_PREFIX)
 /* - change the symbol names of functions to avoid linker conflicts
  * - compat-5.3.c needs to be compiled (and linked) separately
@@ -21,7 +23,6 @@ extern "C" {
 #  if !defined(COMPAT53_API)
 #    define COMPAT53_API extern
 #  endif
-#  undef COMPAT53_INCLUDE_SOURCE
 #else /* COMPAT53_PREFIX */
 /* - make all functions static and include the source.
  * - compat-5.3.c doesn't need to be compiled (and linked) separately
@@ -87,16 +88,13 @@ extern "C" {
 #ifndef LUA_OPLE
 #  define LUA_OPLE 2
 #endif
-#ifndef LUA_FILEHANDLE
-#  define LUA_FILEHANDLE "FILE*"
-#endif
 
-/* LuaJIT/Lua 5.1 does not have the updated 
+/* LuaJIT/Lua 5.1 does not have the updated
  * error codes for thread status/function returns (but some patched versions do)
  * define it only if it's not found
  */
 #if !defined(LUA_ERRGCMM)
-/* Use + 2 because in some versions of Lua (Lua 5.1) 
+/* Use + 2 because in some versions of Lua (Lua 5.1)
  * LUA_ERRFILE is defined as (LUA_ERRERR+1)
  * so we need to avoid it (LuaJIT might have something at this
  * integer value too)
@@ -115,8 +113,7 @@ typedef struct luaL_Buffer_53 {
 } luaL_Buffer_53;
 #define luaL_Buffer luaL_Buffer_53
 
-/*
- * In PUC-Rio 5.1, userdata is a simple FILE*
+/* In PUC-Rio 5.1, userdata is a simple FILE*
  * In LuaJIT, it's a struct where the first member is a FILE*
  * We can't support the `closef` member
  */
