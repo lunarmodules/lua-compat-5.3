@@ -51,8 +51,6 @@ extern "C" {
  * lua_upvaluejoin
  * lua_version
  * lua_yieldk
- * luaL_loadbufferx
- * luaL_loadfilex
  */
 
 #ifndef LUA_OK
@@ -175,6 +173,15 @@ COMPAT53_API lua_Number lua_tonumberx (lua_State *L, int i, int *isnum);
 
 #define luaL_checkversion COMPAT53_CONCAT(COMPAT53_PREFIX, L_checkversion)
 COMPAT53_API void luaL_checkversion (lua_State *L);
+
+#define lua_load COMPAT53_CONCAT(COMPAT53_PREFIX, _load_53)
+COMPAT53_API int lua_load (lua_State *L, lua_Reader reader, void *data, const char* source, const char* mode);
+
+#define luaL_loadfilex COMPAT53_CONCAT(COMPAT53_PREFIX, L_loadfilex)
+COMPAT53_API int luaL_loadfilex (lua_State *L, const char *filename, const char *mode);
+
+#define luaL_loadbufferx COMPAT53_CONCAT(COMPAT53_PREFIX, L_loadbufferx)
+COMPAT53_API int luaL_loadbufferx (lua_State *L, const char *buff, size_t sz, const char *name, const char *mode);
 
 #define luaL_checkstack COMPAT53_CONCAT(COMPAT53_PREFIX, L_checkstack_53)
 COMPAT53_API void luaL_checkstack (lua_State *L, int sp, const char *msg);
