@@ -146,7 +146,7 @@ For Lua 5.1 additionally:
 * `LUA_OP*` macros for `lua_arith` and `lua_compare`
 * `LUA_FILEHANDLE`
 * `lua_Unsigned`
-* `luaL_Stream` (limited compatibility, see[here][19])
+* `luaL_Stream` (limited compatibility, see [here][19])
 * `lua_absindex`
 * `lua_arith` (see [here][20])
 * `lua_compare`
@@ -229,8 +229,8 @@ This package contains code written by:
   [16]: https://github.com/keplerproject/lua-compat-5.3/wiki/lua_getuservalue
   [17]: https://github.com/keplerproject/lua-compat-5.3/wiki/lua_setuservalue
   [18]: https://github.com/keplerproject/lua-compat-5.3/wiki/lua_stringtonumber
-  [19]: https://github.com/keplerproject/lua-compat-5.3/wiki/lua_arith
-  [20]: https://github.com/keplerproject/lua-compat-5.3/wiki/luaL_Stream
+  [19]: https://github.com/keplerproject/lua-compat-5.3/wiki/luaL_Stream
+  [20]: https://github.com/keplerproject/lua-compat-5.3/wiki/lua_arith
   [21]: https://github.com/keplerproject/lua-compat-5.3/wiki/luaL_checkversion
   [22]: https://github.com/keplerproject/lua-compat-5.3/wiki/luaL_Buffer
   [23]: https://github.com/keplerproject/lua-compat-5.3/wiki/coroutine.running
