@@ -12,7 +12,7 @@ static int test_isinteger (lua_State *L) {
 
 
 static int test_rotate (lua_State *L) {
-  int r = luaL_checkint(L, 1);
+  int r = (int)luaL_checkinteger(L, 1);
   int n = lua_gettop(L)-1;
   luaL_argcheck(L, (r < 0 ? -r : r) <= n, 1, "not enough arguments");
   lua_rotate(L, 2, r);
