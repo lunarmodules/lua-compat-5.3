@@ -334,6 +334,9 @@ static const luaL_Reg more_funcs[] = {
 };
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 int luaopen_testmod (lua_State *L) {
   int i = 1;
   luaL_newlib(L, funcs);
@@ -342,4 +345,7 @@ int luaopen_testmod (lua_State *L) {
   luaL_setfuncs(L, more_funcs, NUP);
   return 1;
 }
+#ifdef __cplusplus
+}
+#endif
 
