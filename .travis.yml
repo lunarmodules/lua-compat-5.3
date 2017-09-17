@@ -40,7 +40,6 @@ notifications:
 
 before_install:
   - export CC=gcc
-  - pip install --user diff-highlight
   - pip install --user hererocks
   - hererocks old --$LUAV
   - test -e old/bin/lua || (cd old/bin && ln -s luajit* lua)
@@ -56,5 +55,5 @@ install:
 script:
   - (cd old && bin/lua ../tests/test.lua) > old.txt
   - (cd new && bin/lua ../tests/test.lua) > new.txt
-  - diff-highlight old.txt new.txt || true
+  - diff old.txt new.txt || true
 
