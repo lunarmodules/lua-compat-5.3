@@ -1,7 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <lua.h>
-#include <lauxlib.h>
 #include "compat-5.3.h"
 
 
