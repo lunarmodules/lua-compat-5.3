@@ -40,7 +40,7 @@ notifications:
 
 before_install:
   - export CC=gcc
-  - pip install --user hererocks
+  - pip install hererocks
   - hererocks old --$LUAV
   - hererocks new --lua=5.3
 
