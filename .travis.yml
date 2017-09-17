@@ -40,17 +40,15 @@ notifications:
 
 before_install:
   - export CC=gcc
-  - pip install hererocks
+  - pip install --user hererocks
   - hererocks old --$LUAV
   - hererocks new --lua=5.3
 
 install:
   - export CC="${COMPILER:-gcc}" DEF="" SRC="" CFLAGS="-Wall -Wextra -Ic-api -O2 -fPIC"
-  - if [ "x${EXTERNAL:-}" = xtrue ]; then  # compile+link compat-5.3.c separately
-      DEF="-DCOMPAT53_PREFIX=compat53" SRC="c-api/compat-5.3.c"
-    fi
-  - "${CC}" ${CFLAGS} -Iold/include ${DEF} -shared -o old/testmod.so tests/testmod.c ${SRC}
-  - "${CC}" ${CFLAGS} -Inew/include ${DEF} -shared -o new/testmod.so tests/testmod.c ${SRC}
+  - if [ "x${EXTERNAL:-}" = xtrue ]; then DEF="-DCOMPAT53_PREFIX=compat53" SRC="c-api/compat-5.3.c"; fi
+  - ${CC} ${CFLAGS} -Iold/include ${DEF} -shared -o old/testmod.so tests/testmod.c ${SRC}
+  - ${CC} ${CFLAGS} -Inew/include ${DEF} -shared -o new/testmod.so tests/testmod.c ${SRC}
   - gcc ${CFLAGS} -Iold/include ${DEF} -shared -o old/compat53.so ltablib.c lutf8lib.c lstrlib.c ${SRC}
 
 script:
