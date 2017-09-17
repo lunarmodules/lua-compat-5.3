@@ -1,74 +1,60 @@
 language: python
+sudo: false
 
 matrix:
   include:
-    - os: linux
-      env:
-        - INSTALL_LUA="lua=5.1"
-        - LUA="lua"
-    - os: linux
-      env:
-        - INSTALL_LUA="lua=5.2"
-        - LUA="lua"
-    - os: linux
-      env:
-        - INSTALL_LUA="lua=5.3"
-        - LUA="lua"
-    - os: linux
-      env:
-        - INSTALL_LUA="luajit=2.0"
-        - LUA="luajit"
-    - os: linux
-      env:
-        - INSTALL_LUA="luajit=2.1"
-        - LUA="luajit"
-    - os: osx
-      language: generic
-      env:
-        - INSTALL_LUA="lua=5.1"
-        - LUA="luajit"
-    - os: osx
-      language: generic
-      env:
-        - INSTALL_LUA="lua=5.2"
-        - LUA="luajit"
-    - os: osx
-      language: generic
-      env:
-        - INSTALL_LUA="lua=5.3"
-        - LUA="luajit"
-    - os: osx
-      language: generic
-      env:
-        - INSTALL_LUA="luajit=2.0"
-        - LUA="luajit"
-    - os: osx
-      language: generic
-      env:
-        - INSTALL_LUA="luajit=2.1"
-        - LUA="luajit"
+    - compiler: ": Lua 5.1"
+      env: LUAV="lua=5.1"
+    - compiler: ": Lua 5.1"
+      env: LUAV="lua=5.1" EXTERNAL=true
+    - compiler: ": Lua 5.1/g++"
+      env: LUAV="lua=5.1" COMPILER="g++"
+    - compiler: ": Lua 5.1/g++"
+      env: LUAV="lua=5.1" EXTERNAL=true COMPILER="g++"
+    - compiler: ": LuaJIT 2.1 HEAD"
+      env: LUAV="luajit=@v2.1 --compat=none" LUA=luajit
+    - compiler: ": LuaJIT 2.1 HEAD"
+      env: LUAV="luajit=@v2.1 --compat=none" EXTERNAL=true LUA=luajit
+    - compiler: ": LuaJIT 2.1 HEAD +compat52"
+      env: LUAV="luajit=@v2.1 --compat=all" LUA=luajit
+    - compiler: ": LuaJIT 2.1 HEAD +compat52"
+      env: LUAV="luajit=@v2.1 --compat=all" EXTERNAL=true LUA=luajit
+    - compiler: ": Lua 5.2"
+      env: LUAV="lua=5.2"
+    - compiler: ": Lua 5.2"
+      env: LUAV="lua=5.2" EXTERNAL=true
+    - compiler: ": Lua 5.2/g++"
+      env: LUAV="lua=5.2" COMPILER="g++"
+    - compiler: ": Lua 5.2/g++"
+      env: LUAV="lua=5.2" EXTERNAL=true COMPILER="g++"
 
+#branches:
+#only:
+#- master
 
-before_install:
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update;fi
-  - pip install hererocks
-  - hererocks lua_install -rlatest --$INSTALL_LUA
-  - export PATH=$PATH:$PWD/lua_install/bin # Add directory with all installed binaries to PATH
-
-#install:
-#  - luarocks install busted
-#  - luarocks install luacov
-#  - luarocks install luacov-coveralls
-
-script:
-  - cd tests; gcc -o testmod.so -shared testmod.c -I../c-api -I../lua_install/include -fPIC
-  - $LUA test.lua
-
-#after_success:
-#  - luacov -c $TRAVIS_BUILD_DIR/test/luacov.config
-#  - cd $TRAVIS_BUILD_DIR/test/ && bash <(curl -s https://codecov.io/bash)
+git:
+  depth: 3
 
 notifications:
-  email:
-    on_success: change
-    on_failure: change
+  email: false
+
+before_install:
+  - export CC=gcc
+  - pip install hererocks
+  - hererocks old --$LUAV
+  - hererocks new --lua=5.3
+
+install:
+  - export CC="${COMPILER:-gcc}" DEF="" SRC="" CFLAGS="-Wall -Wextra -Ic-api -O2 -fPIC"
+  - if [ "x${EXTERNAL:-}" = xtrue ]; then  # compile+link compat-5.3.c separately
+      DEF="-DCOMPAT53_PREFIX=compat53" SRC="c-api/compat-5.3.c"
+    fi
+  - "${CC}" ${CFLAGS} -Iold/include ${DEF} -shared -o old/testmod.so tests/testmod.c ${SRC}
+  - "${CC}" ${CFLAGS} -Inew/include ${DEF} -shared -o new/testmod.so tests/testmod.c ${SRC}
+  - gcc ${CFLAGS} -Iold/include ${DEF} -shared -o old/compat53.so ltablib.c lutf8lib.c lstrlib.c ${SRC}
+
+script:
+  - (cd old && "bin/${LUA:-lua}" ../tests/test.lua) > old.txt
+  - (cd new && "bin/${LUA:-lua}" ../tests/test.lua) > new.txt
+  - diff old.txt new.txt || true
+
