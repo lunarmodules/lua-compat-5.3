@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/keplerproject/lua-compat-5.3.svg?branch=master)](https://travis-ci.org/keplerproject/lua-compat-5.3)
+
 # lua-compat-5.3
 
 Lua-5.3-style APIs for Lua 5.2 and 5.1.
