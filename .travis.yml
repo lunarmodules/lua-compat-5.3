@@ -17,9 +17,9 @@ env:
   - LUA="lua=5.2" COMPILER="g++"
   - LUA="lua=5.2" EXTERNAL=true COMPILER="g++"
 
-#branches:
-#only:
-#- master
+branches:
+  only:
+    - master
 
 git:
   depth: 3
