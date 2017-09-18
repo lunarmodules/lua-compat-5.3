@@ -40,7 +40,7 @@ local mode = "global"
 if arg[1] == "module" then
   mode = "module"
 end
-
+local self = arg[0]
 
 package.path = "../?.lua;../?/init.lua"
 package.cpath = "./?-"..V..".so;./?-"..V..".dll;./?.so;./?.dll"
@@ -603,11 +603,11 @@ end
 ___''
 do
    writefile("data.txt", "123 18.8 hello world\ni'm here\n")
-   for a,b in io.lines("test.lua", 2, "*l") do
+   for a,b in io.lines(self, 2, "*l") do
       print("io.lines()", a, b)
       break
    end
-   for l in io.lines("test.lua") do
+   for l in io.lines(self) do
       print("io.lines()", l)
       break
    end
@@ -624,7 +624,7 @@ do
       for l in io.lines("no_such_file.txt") do print(l) end
    end))
    if mode ~= "module" then
-     local f = assert(io.open("test.lua", "r"))
+     local f = assert(io.open(self, "r"))
      for a,b in f:lines(2, "*l") do
         print("file:lines()", a, b)
         break

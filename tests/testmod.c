@@ -1,7 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <lua.h>
-#include <lauxlib.h>
 #include "compat-5.3.h"
 
 
@@ -12,7 +10,7 @@ static int test_isinteger (lua_State *L) {
 
 
 static int test_rotate (lua_State *L) {
-  int r = luaL_checkint(L, 1);
+  int r = (int)luaL_checkinteger(L, 1);
   int n = lua_gettop(L)-1;
   luaL_argcheck(L, (r < 0 ? -r : r) <= n, 1, "not enough arguments");
   lua_rotate(L, 2, r);
@@ -336,6 +334,9 @@ static const luaL_Reg more_funcs[] = {
 };
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 int luaopen_testmod (lua_State *L) {
   int i = 1;
   luaL_newlib(L, funcs);
@@ -344,4 +345,7 @@ int luaopen_testmod (lua_State *L) {
   luaL_setfuncs(L, more_funcs, NUP);
   return 1;
 }
+#ifdef __cplusplus
+}
+#endif
 
