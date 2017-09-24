@@ -56,12 +56,16 @@ static char* compat53_strerror (int en, char* buff, size_t sz) {
   if (sz > 0) {
     buff[0] = '\0';
     /* we don't care whether the GNU version or the XSI version is used: */
-    strerror_r(en, buff, sz);
-    if (buff[0] == '\0')
-      /* buffer is unchanged, so we probably have called GNU strerror_r which
+    if (strerror_r(en, buff, sz)) {
+      /* Yes, we really DO want to ignore the return value!
+       * GCC makes that extra hard, not even a (void) cast will do. */
+    }
+    if (buff[0] == '\0') {
+      /* Buffer is unchanged, so we probably have called GNU strerror_r which
        * returned a static constant string. Chances are that strerror will
        * return the same static constant string and therefore be thread-safe. */
       return strerror(en);
+    }
   }
   return buff; /* sz is 0 *or* strerror_r wrote into the buffer */
 #elif COMPAT53_HAVE_STRERROR_S
