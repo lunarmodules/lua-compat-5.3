@@ -705,6 +705,11 @@ print("tonumber", mod.tonumber("error"))
 
 ___''
 print("tointeger", mod.tointeger(12))
+print("tointeger", mod.tointeger(-12))
+print("tointeger", mod.tointeger(12.1))
+print("tointeger", mod.tointeger(12.9))
+print("tointeger", mod.tointeger(-12.1))
+print("tointeger", mod.tointeger(-12.9))
 print("tointeger", mod.tointeger("12"))
 print("tointeger", mod.tointeger("0"))
 print("tointeger", mod.tointeger(math.pi))

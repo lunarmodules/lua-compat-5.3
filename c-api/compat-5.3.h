@@ -165,6 +165,8 @@ COMPAT53_API void lua_rawsetp(lua_State *L, int i, const void *p);
 
 #define lua_rawlen(L, i) lua_objlen((L), (i))
 
+#define lua_tointeger(L, i) lua_tointegerx((L), (i), NULL)
+
 #define lua_tointegerx COMPAT53_CONCAT(COMPAT53_PREFIX, _tointegerx)
 COMPAT53_API lua_Integer lua_tointegerx (lua_State *L, int i, int *isnum);
 

@@ -205,11 +205,18 @@ COMPAT53_API void lua_rawsetp (lua_State *L, int i, const void *p) {
 
 
 COMPAT53_API lua_Integer lua_tointegerx (lua_State *L, int i, int *isnum) {
-  lua_Integer n = lua_tointeger(L, i);
-  if (isnum != NULL) {
-    *isnum = (n != 0 || lua_isnumber(L, i));
+  int ok = 0;
+  lua_Number n = lua_tonumberx(L, i, &ok);
+  lua_Integer j = (lua_tointeger)(L, i); /* native lua_tointeger */
+  if (isnum == NULL)
+    isnum = &ok;
+  if (ok && n == j) {
+    *isnum = 1;
+    return j;
+  } else {
+    *isnum = 0;
+    return 0;
   }
-  return n;
 }
 
 
