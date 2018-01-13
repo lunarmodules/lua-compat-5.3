@@ -225,9 +225,9 @@ static int test_uservalue (lua_State *L) {
   int ui = lua_gettop(L);
   lua_newtable(L);
   lua_setuservalue(L, ui);
-  lua_getuservalue(L, ui);
+  lua_pushinteger(L, lua_getuservalue(L, ui));
   (void)udata;
-  return 1;
+  return 2;
 }
 
 static int test_upvalues (lua_State *L) {
