@@ -167,9 +167,6 @@ COMPAT53_API void lua_rawsetp(lua_State *L, int i, const void *p);
 
 #define lua_tointeger(L, i) lua_tointegerx((L), (i), NULL)
 
-#define lua_tointegerx COMPAT53_CONCAT(COMPAT53_PREFIX, _tointegerx)
-COMPAT53_API lua_Integer lua_tointegerx (lua_State *L, int i, int *isnum);
-
 #define lua_tonumberx COMPAT53_CONCAT(COMPAT53_PREFIX, _tonumberx)
 COMPAT53_API lua_Number lua_tonumberx (lua_State *L, int i, int *isnum);
 
@@ -298,6 +295,9 @@ COMPAT53_API int lua_geti (lua_State *L, int index, lua_Integer i);
 
 #define lua_isinteger COMPAT53_CONCAT(COMPAT53_PREFIX, _isinteger)
 COMPAT53_API int lua_isinteger (lua_State *L, int index);
+
+#define lua_tointegerx COMPAT53_CONCAT(COMPAT53_PREFIX, _tointegerx_53)
+COMPAT53_API lua_Integer lua_tointegerx (lua_State *L, int i, int *isnum);
 
 #define lua_numbertointeger(n, p) \
   ((*(p) = (lua_Integer)(n)), 1)
