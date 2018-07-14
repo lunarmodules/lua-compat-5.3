@@ -141,6 +141,7 @@ For Lua 5.1 additionally:
 * `luaL_requiref` (now checks `package.loaded` first)
 * `lua_rotate`
 * `lua_stringtonumber` (see [here][18])
+* `lua_getextraspace` (limited compatability, can store `sizeof(void*)`)
 
 For Lua 5.1 additionally:
 * `LUA_OK`
@@ -186,7 +187,6 @@ For Lua 5.1 additionally:
   [`lua-compat-5.2`][2] for a detailed list.
 * the following C API functions/macros:
   * `lua_isyieldable`
-  * `lua_getextraspace`
   * `lua_arith` (new operators missing)
   * `lua_push(v)fstring` (new formats missing)
   * `lua_upvalueid` (5.1)

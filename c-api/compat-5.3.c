@@ -854,6 +854,46 @@ COMPAT53_API void luaL_requiref (lua_State *L, const char *modname,
   lua_replace(L, -2);
 }
 
+COMPAT53_API void *lua_getextraspace (lua_State *L) {
+  void *ud;
+  void *extra;
+  lua_Alloc alloc = lua_getallocf(L, &ud);
+
+  lua_getfield(L, LUA_REGISTRYINDEX, "__extraspace");
+  if (lua_isnil(L, -1)) {
+    extra = alloc(ud, NULL, 0, sizeof(void *));
+    if (!extra) {
+      lua_pop(L, 1);
+      return NULL;
+    }
+    lua_pushlstring(L, (const char *)&extra, sizeof(extra));
+    lua_setfield(L, LUA_REGISTRYINDEX, "__extraspace");
+  } else {
+    extra = *(void **)lua_tostring(L, -1);
+  }
+
+  lua_pop(L, 1);
+  return extra;
+}
+
+COMPAT53_API void lua_close (lua_State *L) {
+  void *ud;
+  void *extra;
+  lua_Alloc alloc = lua_getallocf(L, &ud);
+
+  lua_getfield(L, LUA_REGISTRYINDEX, "__extraspace");
+  if (!lua_isnil(L, -1)) {
+    extra = *(void **)lua_tostring(L, -1);
+    alloc(ud, extra, sizeof(void *), 0);
+  }
+
+  lua_pop(L, 1);
+
+  /* we need to call the original 5.1 version of lua_close! */
+#undef lua_close
+  lua_close(L);
+#define lua_close COMPAT53_CONCAT(COMPAT53_PREFIX, _close_53)
+}
 
 #endif /* Lua 5.1 and 5.2 */
 

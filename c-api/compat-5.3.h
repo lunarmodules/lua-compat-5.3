@@ -330,6 +330,11 @@ COMPAT53_API const char *luaL_tolstring (lua_State *L, int idx, size_t *len);
 COMPAT53_API void luaL_requiref (lua_State *L, const char *modname,
                                  lua_CFunction openf, int glb );
 
+#define lua_close COMPAT53_CONCAT(COMPAT53_PREFIX, _close_53)
+COMPAT53_API void lua_close(lua_State *L);
+
+COMPAT53_API void *lua_getextraspace(lua_State *L);
+
 #endif /* Lua 5.1 and Lua 5.2 */
 
 
@@ -339,7 +344,6 @@ COMPAT53_API void luaL_requiref (lua_State *L, const char *modname,
 
 /* XXX not implemented:
  * lua_isyieldable
- * lua_getextraspace
  * lua_arith (new operators)
  * lua_pushfstring (new formats)
  */
