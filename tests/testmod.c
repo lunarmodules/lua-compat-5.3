@@ -63,6 +63,21 @@ static int test_getseti (lua_State *L) {
 }
 
 
+#ifndef LUA_EXTRASPACE
+#define LUA_EXTRASPACE (sizeof(void*))
+#endif
+
+static int test_getextraspace (lua_State *L) {
+  size_t len = 0;
+  char const* s = luaL_optlstring(L, 1, NULL, &len);
+  void* p = lua_getextraspace(L);
+  lua_pushstring(L, p);
+  if (s)
+    memcpy(p, s, len > LUA_EXTRASPACE-1 ? LUA_EXTRASPACE-1 : len+1);
+  return 1;
+}
+
+
 /* additional tests for Lua5.1 */
 #define NUP 3
 
@@ -307,6 +322,7 @@ static const luaL_Reg funcs[] = {
   { "strtonum", test_str2num },
   { "requiref", test_requiref },
   { "getseti", test_getseti },
+  { "extraspace", test_getextraspace },
   { "newproxy", test_newproxy },
   { "arith", test_arith },
   { "compare", test_compare },

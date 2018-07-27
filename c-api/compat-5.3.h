@@ -293,6 +293,9 @@ typedef int (*lua_KFunction)(lua_State *L, int status, lua_KContext ctx);
 #define lua_geti COMPAT53_CONCAT(COMPAT53_PREFIX, _geti)
 COMPAT53_API int lua_geti (lua_State *L, int index, lua_Integer i);
 
+#define lua_getextraspace COMPAT53_CONCAT(COMPAT53_PREFIX, _getextraspace)
+COMPAT53_API void *lua_getextraspace (lua_State *L);
+
 #define lua_isinteger COMPAT53_CONCAT(COMPAT53_PREFIX, _isinteger)
 COMPAT53_API int lua_isinteger (lua_State *L, int index);
 
@@ -339,7 +342,6 @@ COMPAT53_API void luaL_requiref (lua_State *L, const char *modname,
 
 /* XXX not implemented:
  * lua_isyieldable
- * lua_getextraspace
  * lua_arith (new operators)
  * lua_pushfstring (new formats)
  */

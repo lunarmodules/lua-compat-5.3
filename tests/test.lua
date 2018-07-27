@@ -664,13 +664,11 @@ print("isinteger", mod.isinteger(12.3))
 print("isinteger", mod.isinteger(math.huge))
 print("isinteger", mod.isinteger(math.sqrt(-1)))
 
-
 ___''
 print("rotate", mod.rotate(1, 1, 2, 3, 4, 5, 6))
 print("rotate", mod.rotate(-1, 1, 2, 3, 4, 5, 6))
 print("rotate", mod.rotate(4, 1, 2, 3, 4, 5, 6))
 print("rotate", mod.rotate(-4, 1, 2, 3, 4, 5, 6))
-
 
 ___''
 print("strtonum", mod.strtonum("+123"))
@@ -679,12 +677,25 @@ print("strtonum", mod.strtonum("-1.23"))
 print("strtonum", mod.strtonum(" 123 abc"))
 print("strtonum", mod.strtonum("jkl"))
 
-
 ___''
 local a, b, c = mod.requiref()
 print("requiref", type(a), type(b), type(c),
       a.boolean, b.boolean, c.boolean,
       type(requiref1), type(requiref2), type(requiref3))
+
+___''
+mod.extraspace("abc")
+print("getextraspace", mod.extraspace("xyz"))
+local c = coroutine.wrap(function()
+  print("getextraspace", mod.extraspace("uvw"))
+  print("getextraspace", mod.extraspace("123"))
+  coroutine.yield()
+  print("getextraspace", mod.extraspace("asd"))
+end)
+c()
+print("getextraspace", mod.extraspace("456"))
+c()
+print("getextraspace", mod.extraspace("789"))
 
 ___''
 local proxy, backend = {}, {}
@@ -705,7 +716,7 @@ print("tonumber", mod.tonumber("error"))
 
 ___''
 print("tointeger", mod.tointeger(12))
-print("tointeger", mod.tointeger(-12))
+print("tointeger", mod.tointeger(12))
 print("tointeger", mod.tointeger(12.1))
 print("tointeger", mod.tointeger(12.9))
 print("tointeger", mod.tointeger(-12.1))

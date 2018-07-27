@@ -720,6 +720,63 @@ COMPAT53_API int lua_geti (lua_State *L, int index, lua_Integer i) {
 }
 
 
+#ifndef LUA_EXTRASPACE
+#define LUA_EXTRASPACE (sizeof(void*))
+#endif
+
+COMPAT53_API void *lua_getextraspace (lua_State *L) {
+  int is_main = 0;
+  void *ptr = NULL;
+  luaL_checkstack(L, 4, "not enough stack slots available");
+  lua_pushliteral(L, "__compat53_extraspace");
+  lua_pushvalue(L, -1);
+  lua_rawget(L, LUA_REGISTRYINDEX);
+  if (!lua_istable(L, -1)) {
+    lua_pop(L, 1);
+    lua_createtable(L, 0, 2);
+    lua_createtable(L, 0, 1);
+    lua_pushliteral(L, "k");
+    lua_setfield(L, -2, "__mode");
+    lua_setmetatable(L, -2);
+    lua_pushvalue(L, -2);
+    lua_pushvalue(L, -2);
+    lua_rawset(L, LUA_REGISTRYINDEX);
+  }
+  lua_replace(L, -2);
+  is_main = lua_pushthread(L);
+  lua_rawget(L, -2);
+  ptr = lua_touserdata(L, -1);
+  if (!ptr) {
+    lua_pop(L, 1);
+    ptr = lua_newuserdata(L, LUA_EXTRASPACE);
+    if (is_main) {
+      memset(ptr, '\0', LUA_EXTRASPACE);
+      lua_pushthread(L);
+      lua_pushvalue(L, -2);
+      lua_rawset(L, -4);
+      lua_pushboolean(L, 1);
+      lua_pushvalue(L, -2);
+      lua_rawset(L, -4);
+    } else {
+      void* mptr = NULL;
+      lua_pushboolean(L, 1);
+      lua_rawget(L, -3);
+      mptr = lua_touserdata(L, -1);
+      if (mptr)
+        memcpy(ptr, mptr, LUA_EXTRASPACE);
+      else
+        memset(ptr, '\0', LUA_EXTRASPACE);
+      lua_pop(L, 1);
+      lua_pushthread(L);
+      lua_pushvalue(L, -2);
+      lua_rawset(L, -4);
+    }
+  }
+  lua_pop(L, 2);
+  return ptr;
+}
+
+
 COMPAT53_API int lua_isinteger (lua_State *L, int index) {
   if (lua_type(L, index) == LUA_TNUMBER) {
     lua_Number n = lua_tonumber(L, index);

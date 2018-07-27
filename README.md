@@ -125,6 +125,7 @@ For Lua 5.1 additionally:
 * `lua_KContext` (see [here][14])
 * `lua_KFunction` (see [here][14])
 * `lua_dump` (extra `strip` parameter, ignored, see [here][15])
+* `lua_getextraspace` (limited compatibilitiy, may throw out-of-memory errors)
 * `lua_getfield` (return value)
 * `lua_geti` and `lua_seti`
 * `lua_getglobal` (return value)
@@ -186,7 +187,6 @@ For Lua 5.1 additionally:
   [`lua-compat-5.2`][2] for a detailed list.
 * the following C API functions/macros:
   * `lua_isyieldable`
-  * `lua_getextraspace`
   * `lua_arith` (new operators missing)
   * `lua_push(v)fstring` (new formats missing)
   * `lua_upvalueid` (5.1)
