@@ -70,7 +70,7 @@ static int test_getseti (lua_State *L) {
 static int test_getextraspace (lua_State *L) {
   size_t len = 0;
   char const* s = luaL_optlstring(L, 1, NULL, &len);
-  void* p = lua_getextraspace(L);
+  char* p = (char*)lua_getextraspace(L);
   lua_pushstring(L, p);
   if (s)
     memcpy(p, s, len > LUA_EXTRASPACE-1 ? LUA_EXTRASPACE-1 : len+1);
