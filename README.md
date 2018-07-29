@@ -125,7 +125,7 @@ For Lua 5.1 additionally:
 * `lua_KContext` (see [here][14])
 * `lua_KFunction` (see [here][14])
 * `lua_dump` (extra `strip` parameter, ignored, see [here][15])
-* `lua_getextraspace` (limited compatibilitiy, may throw out-of-memory errors)
+* `lua_getextraspace` (limited compatibilitiy, see [here][24])
 * `lua_getfield` (return value)
 * `lua_geti` and `lua_seti`
 * `lua_getglobal` (return value)
@@ -236,4 +236,5 @@ This package contains code written by:
   [21]: https://github.com/keplerproject/lua-compat-5.3/wiki/luaL_checkversion
   [22]: https://github.com/keplerproject/lua-compat-5.3/wiki/luaL_Buffer
   [23]: https://github.com/keplerproject/lua-compat-5.3/wiki/coroutine.running
+  [24]: https://github.com/keplerproject/lua-compat-5.3/wiki/lua_getextraspace
 
