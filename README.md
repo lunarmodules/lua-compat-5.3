@@ -142,6 +142,7 @@ For Lua 5.1 additionally:
 * `luaL_requiref` (now checks `package.loaded` first)
 * `lua_rotate`
 * `lua_stringtonumber` (see [here][18])
+* `lua_getextraspace` (limited compatability, can store `sizeof(void*)`)
 
 For Lua 5.1 additionally:
 * `LUA_OK`
