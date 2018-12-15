@@ -448,7 +448,9 @@ static const char *compat53_reader (lua_State *L, void *ud, size_t *size) {
 
 COMPAT53_API int lua_load (lua_State *L, lua_Reader reader, void *data, const char *source, const char *mode) {
   int status = LUA_OK;
-  compat53_reader_data compat53_data = { reader, data, 1, 0, 0 };
+  compat53_reader_data compat53_data = { 0, NULL, 1, 0, 0 };
+  compat53_data.reader = reader;
+  compat53_data.ud = data;
   compat53_data.peeked_data = reader(L, data, &(compat53_data.peeked_data_size));
   if (compat53_data.peeked_data && compat53_data.peeked_data_size &&
       compat53_data.peeked_data[0] == LUA_SIGNATURE[0]) /* binary file? */
