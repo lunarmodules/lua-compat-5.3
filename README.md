@@ -35,7 +35,7 @@ require("compat53")
 a meaningful return value, so the usual idiom of storing the return of
 `require` in a local variable makes no sense.
 
-When run under Lua 5.3, this module does nothing.
+When run under Lua 5.3+, this module does nothing.
 
 When run under Lua 5.2 or 5.1, it replaces some of your standard
 functions and adds new ones to bring your environment closer to that

@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <errno.h>
 #include "compat-5.3.h"
 
 
@@ -285,6 +286,7 @@ static int test_buffer (lua_State *L) {
 
 static int test_exec (lua_State *L) {
   const char *cmd = luaL_checkstring(L, 1);
+  errno = 0;
   return luaL_execresult(L, system(cmd));
 }
 
