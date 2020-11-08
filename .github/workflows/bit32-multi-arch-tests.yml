@@ -19,8 +19,8 @@ jobs:
             apt-get update -q -y
             apt-get install -q -y curl build-essential libreadline-dev libncurses-dev
             mkdir -p "/tmp/.install"
-            (set -o pipefail; curl --fail --silent --location "http://www.lua.org/ftp/lua-${{ matrix.luaVersion }}.tar.gz" | tar --directory=/tmp/.install xzpf -)
-            (set -o pipefail; curl --fail --silent --location "http://luarocks.org/releases/luarocks-${{ matrix.luaRocksVersion }}.tar.gz" | tar --directory=/tmp/.install xzpf -)
+            (set -o pipefail; curl --fail --silent --location "http://www.lua.org/ftp/lua-${{ matrix.luaVersion }}.tar.gz" | tar --directory=/tmp/.install -xzpf -)
+            (set -o pipefail; curl --fail --silent --location "http://luarocks.org/releases/luarocks-${{ matrix.luaRocksVersion }}.tar.gz" | tar --directory=/tmp/.install -xzpf -)
             (cd "/tmp/.install/lua-${{ matrix.luaVersion }}" && make linux && make install)
             (cd "/tmp/.install/luarocks-${{ matrix.luaRocksVersion }}" && ./configure && make && make install)
             rm -rf /var/lib/apt/lists/* /tmp/.install
