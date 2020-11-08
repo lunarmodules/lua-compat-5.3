@@ -26,8 +26,7 @@ jobs:
             (cd "/tmp/.install/luarocks-${{ matrix.luaRocksVersion }}" && ./configure && make && make install)
             rm -rf /var/lib/apt/lists/* /tmp/.install
           run: |
-            uname -a
-            printenv
-            ls -la
-            ls -la /usr/local
+            eval "$(luarocks path)"
+            luarocks make rockspecs/bit32-scm-1.rockspec
+            lua tests/test-bit32.lua
 
