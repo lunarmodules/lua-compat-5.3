@@ -15,6 +15,7 @@ jobs:
         with:
           arch: ${{ matrix.arch }}
           distro: ubuntu20.04
+          githubToken: ${{ github.token }}
           install: |
             apt-get update -q -y
             apt-get install -q -y curl unzip build-essential libreadline-dev libncurses-dev
