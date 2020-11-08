@@ -6,7 +6,6 @@ jobs:
       fail-fast: false
       matrix:
         luaVersion: ["5.1.5", "5.2.4", "5.3.6", "5.4.1"]
-        luaRocksVersion: ["3.3.1"]
         arch: ["armv7", "aarch64"]
     runs-on: ubuntu-latest
     steps:
@@ -19,15 +18,18 @@ jobs:
           install: |
             apt-get update -q -y
             apt-get install -q -y curl unzip build-essential libreadline-dev libncurses-dev
-            mkdir -p "/tmp/.install"
-            (set -o pipefail; curl --fail --silent --location "http://www.lua.org/ftp/lua-${{ matrix.luaVersion }}.tar.gz" | tar --directory=/tmp/.install -xzpf -)
-            (set -o pipefail; curl --fail --silent --location "http://luarocks.org/releases/luarocks-${{ matrix.luaRocksVersion }}.tar.gz" | tar --directory=/tmp/.install -xzpf -)
-            (cd "/tmp/.install/lua-${{ matrix.luaVersion }}" && make linux && make install)
-            (cd "/tmp/.install/luarocks-${{ matrix.luaRocksVersion }}" && ./configure && make && make install)
-            rm -rf /var/lib/apt/lists/* /tmp/.install
+            rm -rf /var/lib/apt/lists/*
           run: |
+            echo "##### Installing Lua and LuaRocks"
+            mkdir -p .install
+            (set -o pipefail; cd .install && curl --fail --silent --location "http://www.lua.org/ftp/lua-${{ matrix.luaVersion }}.tar.gz" | tar xzpf -)
+            (set -o pipefail; cd .install && curl --fail --silent --location "http://luarocks.org/releases/luarocks-3.3.1.tar.gz" | tar xzpf -)
+            (cd ".install/lua-${{ matrix.luaVersion }}" && make linux && make install)
+            (cd ".install/luarocks-3.3.1" && ./configure && make && make install)
+            echo "##### Lua and LuaRocks setup complete"
             eval "$(luarocks path)"
             luarocks make rockspecs/bit32-scm-1.rockspec
+            echo "##### Running tests"
             echo "lua tests/test-bit32.lua"
             lua tests/test-bit32.lua
 
