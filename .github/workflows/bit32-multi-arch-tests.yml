@@ -1,0 +1,32 @@
+name: bit32-multi-arch-tests
+on: [push, pull_request]
+jobs:
+  bit32-test:
+    strategy:
+      fail-fast: false
+      matrix:
+        luaVersion: ["5.1.5", "5.2.4", "5.3.6", "5.4.1"]
+        luaRocksVersion: ["3.2.0"]
+        arch: ["armv7", "aarch64"]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: uraimo/run-on-arch-action@v2.0.7
+        with:
+          arch: ${{ matrix.arch }}
+          distro: ubuntu20.04
+          install: |
+            apt-get update -q -y
+            apt-get install -q -y curl build-essential libreadline-dev libncurses-dev
+            mkdir -p "/tmp/.install"
+            (set -o pipefail; curl --fail --silent --location "http://www.lua.org/ftp/lua-${{ matrix.luaVersion }}.tar.gz" | tar --directory=/tmp/.install xzpf -)
+            (set -o pipefail; curl --fail --silent --location "http://luarocks.org/releases/luarocks-${{ matrix.luaRocksVersion }}.tar.gz" | tar --directory=/tmp/.install xzpf -)
+            (cd "/tmp/.install/lua-${{ matrix.luaVersion }}" && make linux && make install)
+            (cd "/tmp/.install/luarocks-${{ matrix.luaRocksVersion }}" && ./configure && make && make install)
+            rm -rf /var/lib/apt/lists/* /tmp/.install
+          run: |
+            uname -a
+            printenv
+            ls -la
+            ls -la /usr/local
+
