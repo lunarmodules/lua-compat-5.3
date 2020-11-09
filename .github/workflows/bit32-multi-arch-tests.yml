@@ -2,12 +2,14 @@ name: bit32-multi-arch-tests
 on: [push, pull_request]
 jobs:
   bit32-test:
+    runs-on: ubuntu-latest
+    name: bit32 tests on ${{ matrix.luaVersion }} ${{ matrix.arch }}
     strategy:
       fail-fast: false
       matrix:
         luaVersion: ["5.1.5", "5.2.4", "5.3.6", "5.4.1"]
+        luaRocksVersion: ["3.3.1"]
         arch: ["armv7", "aarch64"]
-    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: uraimo/run-on-arch-action@v2.0.7
@@ -20,16 +22,18 @@ jobs:
             apt-get install -q -y curl unzip build-essential libreadline-dev libncurses-dev
             rm -rf /var/lib/apt/lists/*
           run: |
-            echo "##### Installing Lua and LuaRocks"
+            v() {
+              echo -n -e "\033[36m" >&2
+              echo -n "# $*" >&2
+              echo -e "\033[0m" >&2
+              "$@"
+            }
             mkdir -p .install
-            (set -o pipefail; cd .install && curl --fail --silent --location "http://www.lua.org/ftp/lua-${{ matrix.luaVersion }}.tar.gz" | tar xzpf -)
-            (set -o pipefail; cd .install && curl --fail --silent --location "http://luarocks.org/releases/luarocks-3.3.1.tar.gz" | tar xzpf -)
-            (cd ".install/lua-${{ matrix.luaVersion }}" && make linux && make install)
-            (cd ".install/luarocks-3.3.1" && ./configure && make && make install)
-            echo "##### Lua and LuaRocks setup complete"
+            (set -o pipefail; cd .install && v curl --fail --silent --location "http://www.lua.org/ftp/lua-${{ matrix.luaVersion }}.tar.gz" | tar xzpf -)
+            (cd ".install/lua-${{ matrix.luaVersion }}" && v make linux && v make install)
+            (set -o pipefail; cd .install && v curl --fail --silent --location "http://luarocks.org/releases/luarocks-${{ matrix.luaRocksVersion }}.tar.gz" | tar xzpf -)
+            (cd ".install/luarocks-${{ matrix.luaRocksVersion }}" && v ./configure && v make bootstrap)
             eval "$(luarocks path)"
-            luarocks make rockspecs/bit32-scm-1.rockspec
-            echo "##### Running tests"
-            echo "lua tests/test-bit32.lua"
-            lua tests/test-bit32.lua
+            v luarocks make rockspecs/bit32-scm-1.rockspec
+            v lua tests/test-bit32.lua
 
