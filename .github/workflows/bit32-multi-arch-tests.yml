@@ -7,7 +7,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        luaVersion: ["5.1.5", "5.2.4", "5.3.6", "5.4.1"]
+        luaVersion: ["5.1.5", "5.4.1"]
         luaRocksVersion: ["3.3.1"]
         arch: ["armv7", "aarch64"]
     steps:
