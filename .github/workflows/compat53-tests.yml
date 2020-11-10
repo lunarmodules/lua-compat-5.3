@@ -41,10 +41,10 @@ jobs:
       - uses: actions/checkout@v2
       - name: install Lua
         run: |
-          pip install --user hererocks
-          hererocks old --${{ matrix.luaVersion }}
+          pip3 install --user hererocks
+          ~/.local/bin/hererocks old --${{ matrix.luaVersion }}
           test -e old/bin/lua || (cd old/bin && ln -s luajit* lua)
-          hererocks new --lua=5.3
+          ~/.local/bin/hererocks new --lua=5.3
       - name: compile C modules
         run: |
           export CC=${{ matrix.compiler }} CFLAGS="-Wall -Wextra -Ic-api -O2 -fPIC"
