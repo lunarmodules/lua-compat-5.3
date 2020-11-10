@@ -42,7 +42,7 @@ jobs:
       - name: install Lua
         run: |
           pip install --user hererocks
-          hererocks old --${{ luaVersion }}
+          hererocks old --${{ matrix.luaVersion }}
           test -e old/bin/lua || (cd old/bin && ln -s luajit* lua)
           hererocks new --lua=5.3
       - name: compile C modules
