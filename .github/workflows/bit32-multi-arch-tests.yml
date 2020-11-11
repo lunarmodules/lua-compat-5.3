@@ -39,7 +39,7 @@ jobs:
               (set -o pipefail; cd ".install/${{ matrix.arch }}" && v curl --fail --silent --location "http://www.lua.org/ftp/lua-${{ matrix.luaVersion }}.tar.gz" | tar xzpf -)
               (cd ".install/${{ matrix.arch }}/lua-${{ matrix.luaVersion }}" && v make linux)
             fi
-            (cd ".install/${ matrix.arch }}/lua-${{ matrix.luaVersion }}" && v make install)
+            (cd ".install/${{ matrix.arch }}/lua-${{ matrix.luaVersion }}" && v make install)
             (set -o pipefail; cd .install && v curl --fail --silent --location "http://luarocks.org/releases/luarocks-${{ matrix.luaRocksVersion }}.tar.gz" | tar xzpf -)
             (cd ".install/luarocks-${{ matrix.luaRocksVersion }}" && v ./configure && v make bootstrap)
             eval "$(luarocks path)"
