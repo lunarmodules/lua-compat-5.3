@@ -1,4 +1,5 @@
-[![Build Status](https://travis-ci.org/keplerproject/lua-compat-5.3.svg?branch=master)](https://travis-ci.org/keplerproject/lua-compat-5.3)
+[![Compat53 Status](https://github.com/keplerproject/lua-compat-5.3/workflows/compat53-tests/badge.svg)](https://github.com/keplerproject/lua-compat-5.3/actions?workflow=compat53-tests)
+[![Bit32 Status](https://github.com/keplerproject/lua-compat-5.3/workflows/bit32-multi-arch-tests/badge.svg)](https://github.com/keplerproject/lua-compat-5.3/actions?workflow=bit32-multi-arch-tests)
 
 # lua-compat-5.3
 
