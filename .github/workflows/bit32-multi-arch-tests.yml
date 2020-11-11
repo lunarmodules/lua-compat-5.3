@@ -1,5 +1,8 @@
 name: bit32-multi-arch-tests
-on: [push, pull_request]
+on:
+  push:
+    branches: ["master"]
+  pull_request:
 jobs:
   bit32-test:
     runs-on: ubuntu-latest
