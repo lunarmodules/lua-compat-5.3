@@ -1,5 +1,8 @@
 name: compat53-tests
-on: [push, pull_request]
+on:
+  push:
+    branches: ["master"]
+  pull_request:
 jobs:
   compat53-test:
     runs-on: ubuntu-latest
@@ -49,7 +52,7 @@ jobs:
         run: |
           export CC=${{ matrix.compiler }} CFLAGS="-Wall -Wextra -Ic-api -O2 -fPIC"
           export DEF="" SRC=""
-          if [[ "${{ matrix.external }}" = true ]]; then DEF="-DCOMPAT53_PREFIX=compat53" SRC="c-api/compat-5.3.c"; fi
+          if [ "${{ matrix.external }}" = true ]; then DEF="-DCOMPAT53_PREFIX=compat53" SRC="c-api/compat-5.3.c"; fi
           ${CC} ${CFLAGS} -Iold/include ${DEF} -shared -o old/testmod.so tests/testmod.c ${SRC}
           ${CC} ${CFLAGS} -Inew/include ${DEF} -shared -o new/testmod.so tests/testmod.c ${SRC}
           gcc ${CFLAGS} -Iold/include ${DEF} -shared -o old/compat53.so ltablib.c lutf8lib.c lstrlib.c ${SRC}
