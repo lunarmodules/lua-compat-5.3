@@ -1,6 +1,11 @@
 language: c
 compiler: gcc
 
+os: linux
+arch:
+ - amd64
+ - ppc64le
+ 
 sudo: false
 
 env:
@@ -16,6 +21,17 @@ env:
   - LUA="lua=5.2" EXTERNAL=true
   - LUA="lua=5.2" COMPILER="g++"
   - LUA="lua=5.2" EXTERNAL=true COMPILER="g++"
+  
+jobs:
+  exclude:
+      - arch: ppc64le
+        env: LUA="luajit=@v2.1 --compat=none"
+      - arch: ppc64le
+        env: LUA="luajit=@v2.1 --compat=none" EXTERNAL=true
+      - arch: ppc64le
+        env: LUA="luajit=@v2.1 --compat=all"
+      - arch: ppc64le
+        env: LUA="luajit=@v2.1 --compat=all" EXTERNAL=true
 
 branches:
   only:
