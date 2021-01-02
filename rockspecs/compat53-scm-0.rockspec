@@ -27,6 +27,7 @@ build = {
       ["compat53.utf8"] = "lutf8lib.c",
       ["compat53.table"] = "ltablib.c",
       ["compat53.string"] = "lstrlib.c",
+      ["compat53.io"] = "liolib.c",
    }
 }
 

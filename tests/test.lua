@@ -625,11 +625,13 @@ do
    end))
    if mode ~= "module" then
      local f = assert(io.open(self, "r"))
+     print("io.type()", io.type(f))
      for a,b in f:lines(2, "*l") do
         print("file:lines()", a, b)
         break
      end
      f:close()
+     print("io.type()", io.type(f))
      f = assert(io.open("data.txt", "r"))
      for n1,n2,rest in f:lines("*n", "n", "*a") do
         print("file:lines()", n1, n2, rest)
@@ -650,6 +652,18 @@ do
      end))
    end
    os.remove("data.txt")
+   print("io.popen()", pcall(function()
+      local f = assert(io.popen("echo 'hello' && exit 0", "r"))
+      print("io.popen()", f:read("*a"))
+      print("io.popen()", f:close())
+   end))
+   print("io.popen()", pcall(function()
+      local f = assert(io.popen("echo 'hello' && exit 5", "r"))
+      print("io.type()", io.type(f))
+      print("io.popen()", f:read("*a"))
+      print("io.popen()", f:close())
+      print("io.type()", io.type(f))
+   end))
 end
 ___''
 
