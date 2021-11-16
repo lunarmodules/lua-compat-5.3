@@ -143,7 +143,7 @@ COMPAT53_API void lua_len (lua_State *L, int i);
   (lua_pushstring((L), (s)), lua_tostring((L), -1))
 
 #define lua_pushlstring(L, s, len) \
-  ((((len) == 0) ? lua_pushlstring((L), "", 0) : lua_pushlstring((L), (s), (len))), lua_tostring((L), -1))
+  (lua_pushlstring((L), (s), (len)), lua_tostring((L), -1))
 
 #ifndef luaL_newlibtable
 #  define luaL_newlibtable(L, l) \
@@ -351,9 +351,6 @@ COMPAT53_API void luaL_requiref (lua_State *L, const char *modname,
 
 #define lua_getuservalue(L, i) \
   (lua_getuservalue((L), (i)), lua_type((L), -1))
-
-#define lua_pushlstring(L, s, len) \
-  (((len) == 0) ? lua_pushlstring((L), "", 0) : lua_pushlstring((L), (s), (len)))
 
 #define lua_rawgetp(L, i, p) \
   (lua_rawgetp((L), (i), (p)), lua_type((L), -1))
