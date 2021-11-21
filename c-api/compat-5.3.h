@@ -142,9 +142,6 @@ COMPAT53_API void lua_len (lua_State *L, int i);
 #define lua_pushstring(L, s) \
   (lua_pushstring((L), (s)), lua_tostring((L), -1))
 
-#define lua_pushlstring(L, s, len) \
-  ((((len) == 0) ? lua_pushlstring((L), "", 0) : lua_pushlstring((L), (s), (len))), lua_tostring((L), -1))
-
 #ifndef luaL_newlibtable
 #  define luaL_newlibtable(L, l) \
   (lua_createtable((L), 0, sizeof((l))/sizeof(*(l))-1))
@@ -290,6 +287,9 @@ typedef int (*lua_KFunction)(lua_State *L, int status, lua_KContext ctx);
 #define lua_gettable(L, i) \
   (lua_gettable((L), (i)), lua_type((L), -1))
 
+#define lua_pushlstring COMPAT53_CONCAT(COMPAT53_PREFIX, _pushlstring_53)
+COMPAT53_API const char *lua_pushlstring (lua_State *L, const char *s, size_t len);
+
 #define lua_geti COMPAT53_CONCAT(COMPAT53_PREFIX, _geti)
 COMPAT53_API int lua_geti (lua_State *L, int index, lua_Integer i);
 
@@ -351,9 +351,6 @@ COMPAT53_API void luaL_requiref (lua_State *L, const char *modname,
 
 #define lua_getuservalue(L, i) \
   (lua_getuservalue((L), (i)), lua_type((L), -1))
-
-#define lua_pushlstring(L, s, len) \
-  (((len) == 0) ? lua_pushlstring((L), "", 0) : lua_pushlstring((L), (s), (len)))
 
 #define lua_rawgetp(L, i, p) \
   (lua_rawgetp((L), (i), (p)), lua_type((L), -1))

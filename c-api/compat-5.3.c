@@ -715,6 +715,14 @@ void luaL_pushresult (luaL_Buffer_53 *B) {
 #if defined( LUA_VERSION_NUM ) && LUA_VERSION_NUM <= 502
 
 
+COMPAT53_API const char *lua_pushlstring (lua_State *L, const char *s, size_t len) {
+#undef lua_pushlstring
+  lua_pushlstring(L, len > 0 ? s : "", len);
+#define lua_pushlstring COMPAT53_CONCAT(COMPAT53_PREFIX, _pushlstring_53)
+  return lua_tostring(L, -1);
+}
+
+
 COMPAT53_API int lua_geti (lua_State *L, int index, lua_Integer i) {
   index = lua_absindex(L, index);
   lua_pushinteger(L, i);
