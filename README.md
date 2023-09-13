@@ -117,6 +117,8 @@ For Lua 5.1 additionally:
 * `io.write` and `file:write` return file handle
 * `io.lines` and `file:lines` accept format arguments (like `io.read`)
   (see [here][10] and [here][11])
+* `file:close` returns three results when a process is opened
+  with `io.popen`
 * `debug.setmetatable` returns object
 * `debug.getuservalue` (see [here][12])
 * `debug.setuservalue` (see [here][13])

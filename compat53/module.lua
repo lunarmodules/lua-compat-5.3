@@ -67,6 +67,15 @@ if lua_version < "5.3" then
    end
 
 
+   -- load io functions
+   local io_ok, iolib = pcall(require, "compat53.io")
+   if io_ok then
+      for k,v in pairs(iolib) do
+         M.io[k] = v
+      end
+   end
+
+
    -- load string packing functions
    local str_ok, strlib = pcall(require, "compat53.string")
    if str_ok then
