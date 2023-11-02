@@ -19,6 +19,9 @@ jobs:
           - luaVersion: "lua=5.1"
             compiler: g++
             external: true
+          - luaVersion: "lua=5.1"
+            compiler: clang
+            external: false
           - luaVersion: "luajit=@v2.1 --compat=none"
             compiler: gcc
             external: false
@@ -55,7 +58,7 @@ jobs:
           if [ "${{ matrix.external }}" = true ]; then DEF="-DCOMPAT53_PREFIX=compat53" SRC="c-api/compat-5.3.c"; fi
           ${CC} ${CFLAGS} -Iold/include ${DEF} -shared -o old/testmod.so tests/testmod.c ${SRC}
           ${CC} ${CFLAGS} -Inew/include ${DEF} -shared -o new/testmod.so tests/testmod.c ${SRC}
-          gcc ${CFLAGS} -Iold/include ${DEF} -shared -o old/compat53.so ltablib.c lutf8lib.c lstrlib.c liolib.c ${SRC}
+          ${CC} ${CFLAGS} -Iold/include ${DEF} -shared -o old/compat53.so ltablib.c lutf8lib.c lstrlib.c liolib.c ${SRC}
       - name: run test scripts
         run: |
           (cd old && bin/lua ../tests/test.lua) > old.txt
