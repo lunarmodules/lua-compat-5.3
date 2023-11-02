@@ -21,7 +21,7 @@ jobs:
             external: true
           - luaVersion: "lua=5.1"
             compiler: clang
-            external: true
+            external: false
           - luaVersion: "luajit=@v2.1 --compat=none"
             compiler: gcc
             external: false
