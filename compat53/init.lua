@@ -17,57 +17,9 @@ if lua_version < "5.3" then
    local file_meta = gmt(io.stdout)
 
 
-   -- make '*' optional for file:read and file:lines
    if type(file_meta) == "table" and type(file_meta.__index) == "table" then
-
-      local function addasterisk(fmt)
-         if type(fmt) == "string" and fmt:sub(1, 1) ~= "*" then
-            return "*"..fmt
-         else
-            return fmt
-         end
-      end
-
-      local file_lines = file_meta.__index.lines
-      file_meta.__index.lines = function(self, ...)
-         local n = select('#', ...)
-         for i = 1, n do
-            local a = select(i, ...)
-            local b = addasterisk(a)
-            -- as an optimization we only allocate a table for the
-            -- modified format arguments when we have a '*' somewhere
-            if a ~= b then
-               local args = { ... }
-               args[i] = b
-               for j = i+1, n do
-                  args[j] = addasterisk(args[j])
-               end
-               return file_lines(self, unpack(args, 1, n))
-            end
-         end
-         return file_lines(self, ...)
-      end
-
-      local file_read = file_meta.__index.read
-      file_meta.__index.read = function(self, ...)
-         local n = select('#', ...)
-         for i = 1, n do
-            local a = select(i, ...)
-            local b = addasterisk(a)
-            -- as an optimization we only allocate a table for the
-            -- modified format arguments when we have a '*' somewhere
-            if a ~= b then
-               local args = { ... }
-               args[i] = b
-               for j = i+1, n do
-                  args[j] = addasterisk(args[j])
-               end
-               return file_read(self, unpack(args, 1, n))
-            end
-         end
-         return file_read(self, ...)
-      end
-
+      local file_mt = require("compat53.file_mt")
+      file_mt.update_file_meta(file_meta)
    end -- got a valid metatable for file objects
 
 

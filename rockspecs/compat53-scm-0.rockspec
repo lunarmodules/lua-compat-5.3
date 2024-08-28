@@ -24,6 +24,7 @@ build = {
    modules = {
       ["compat53.init"] = "compat53/init.lua",
       ["compat53.module"] = "compat53/module.lua",
+      ["compat53.file_mt"] = "compat53/file_mt.lua",
       ["compat53.utf8"] = "lutf8lib.c",
       ["compat53.table"] = "ltablib.c",
       ["compat53.string"] = "lstrlib.c",

@@ -575,7 +575,7 @@ ___''
 do
    print("io.write()", io.type(io.write("hello world\n")))
    local f = assert(io.tmpfile())
-   print("file:write()", io.type(f:write("hello world\n")))
+   print("io.tmpfile => file:write()", io.type(f:write("hello world\n")))
    f:close()
 end
 
@@ -588,14 +588,17 @@ do
    io.input("data.txt")
    print("io.read()", io.read("n", "number", "l", "a"))
    io.input(io.stdin)
-   if mode ~= "module" then
-     local f = assert(io.open("data.txt", "r"))
-     print("file:read()", f:read("*n", "*number", "*l", "*a"))
-     f:close()
-     f = assert(io.open("data.txt", "r"))
-     print("file:read()", f:read("n", "number", "l", "a"))
-     f:close()
-   end
+   local f = assert(io.open("data.txt", "r"))
+   print("file:read()", f:read("*n", "*number", "*l", "*a"))
+   f:close()
+   f = assert(io.open("data.txt", "r"))
+   print("file:read()", f:read("n", "number", "l", "a"))
+   f:close()
+   os.remove("data.txt")
+
+   local g = assert(io.open("data.txt", "w"))
+   print("io.open => file:write()", type(g:write("hello")))
+   g:close()
    os.remove("data.txt")
 end
 
