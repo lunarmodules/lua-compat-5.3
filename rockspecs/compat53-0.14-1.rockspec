@@ -1,8 +1,8 @@
 package = "compat53"
-version = "0.13-1"
+version = "0.14-1"
 source = {
-   url = "https://github.com/lunarmodules/lua-compat-5.3/archive/v0.13.zip",
-   dir = "lua-compat-5.3-0.13"
+   url = "https://github.com/lunarmodules/lua-compat-5.3/archive/v0.14.zip",
+   dir = "lua-compat-5.3-0.14"
 }
 description = {
    summary = "Compatibility module providing Lua-5.3-style APIs for Lua 5.2 and 5.1",
@@ -22,6 +22,7 @@ dependencies = {
 build = {
    type = "builtin",
    modules = {
+      ["compat53.file_mt"] = "compat53/file_mt.lua",
       ["compat53.init"] = "compat53/init.lua",
       ["compat53.io"] = "liolib.c",
       ["compat53.module"] = "compat53/module.lua",
