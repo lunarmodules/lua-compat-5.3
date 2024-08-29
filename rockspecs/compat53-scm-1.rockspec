@@ -1,5 +1,5 @@
 package = "compat53"
-version = "scm-0"
+version = "scm-1"
 source = {
    url = "https://github.com/lunarmodules/lua-compat-5.3/archive/master.zip",
    dir = "lua-compat-5.3-master",
