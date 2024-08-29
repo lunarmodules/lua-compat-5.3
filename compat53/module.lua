@@ -115,6 +115,7 @@ if lua_version < "5.3" then
       M.math.mininteger = minint
 
       function M.math.tointeger(n)
+         n = tonumber(n)
          if type(n) == "number" and n <= maxint and n >= minint and n % 1 == 0 then
             return n
          end

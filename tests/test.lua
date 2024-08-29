@@ -228,6 +228,7 @@ print("math.mininteger", math.mininteger-1 < math.mininteger)
 ___''
 print("math.tointeger", math.tointeger(0))
 print("math.tointeger", math.tointeger(math.pi))
+print("math.tointeger", math.tointeger("123"))
 print("math.tointeger", math.tointeger("hello"))
 print("math.tointeger", math.tointeger(math.maxinteger+2.0))
 print("math.tointeger", math.tointeger(math.mininteger*2.0))
