@@ -205,65 +205,6 @@ if lua_version < "5.3" then
          end
       end
 
-      local compat_file_meta = {}
-      local compat_file_meta_loaded = false
-
-      local function load_compat_file_meta(file_meta)
-         -- fill compat_file_meta with original entries
-         for k, v in pairs(file_meta) do
-            compat_file_meta[k] = v
-         end
-         compat_file_meta.__index = {}
-         for k, v in pairs(file_meta.__index) do
-            compat_file_meta.__index[k] = v
-         end
-
-         -- update it with compatibility functions
-         local file_mt = require("compat53.file_mt")
-         file_mt.update_file_meta(compat_file_meta)
-
-         compat_file_meta_loaded = true
-      end
-
-      function M.io.open(...)
-         local fd, err = io_open(...)
-         if fd and debug_setmetatable then
-            if not compat_file_meta_loaded then
-               local file_meta = gmt(fd)
-               load_compat_file_meta(file_meta)
-            end
-            debug_setmetatable(fd, compat_file_meta)
-         end
-
-         return fd, err
-      end
-
-      function M.io.popen(...)
-         local fd, err = io_popen(...)
-         if fd and debug_setmetatable then
-            if not compat_file_meta_loaded then
-               local file_meta = gmt(fd)
-               load_compat_file_meta(file_meta)
-            end
-            debug_setmetatable(fd, compat_file_meta)
-         end
-
-         return fd, err
-      end
-
-      function M.io.tmpfile(...)
-         local fd, err = io_tmpfile(...)
-         if fd and debug_setmetatable then
-            if not compat_file_meta_loaded then
-               local file_meta = gmt(fd)
-               load_compat_file_meta(file_meta)
-            end
-            debug_setmetatable(fd, compat_file_meta)
-         end
-
-         return fd, err
-      end
-
       function M.io.read(...)
          local n = select('#', ...)
          for i = 1, n do
@@ -883,6 +824,67 @@ if lua_version < "5.3" then
             return lines_iterator, st
          end
       end -- not luajit
+
+      if is_luajit then
+         local compat_file_meta = {}
+         local compat_file_meta_loaded = false
+
+         local function load_compat_file_meta(file_meta)
+            -- fill compat_file_meta with original entries
+            for k, v in pairs(file_meta) do
+               compat_file_meta[k] = v
+            end
+            compat_file_meta.__index = {}
+            for k, v in pairs(file_meta.__index) do
+               compat_file_meta.__index[k] = v
+            end
+
+            -- update it with compatibility functions
+            local file_mt = require("compat53.file_mt")
+            file_mt.update_file_meta(compat_file_meta, is_luajit52)
+
+            compat_file_meta_loaded = true
+         end
+
+         function M.io.open(...)
+            local fd, err = io_open(...)
+            if fd and debug_setmetatable then
+               if not compat_file_meta_loaded then
+                  local file_meta = gmt(fd)
+                  load_compat_file_meta(file_meta)
+               end
+               debug_setmetatable(fd, compat_file_meta)
+            end
+
+            return fd, err
+         end
+
+         function M.io.popen(...)
+            local fd, err = io_popen(...)
+            if fd and debug_setmetatable then
+               if not compat_file_meta_loaded then
+                  local file_meta = gmt(fd)
+                  load_compat_file_meta(file_meta)
+               end
+               debug_setmetatable(fd, compat_file_meta)
+            end
+
+            return fd, err
+         end
+
+         function M.io.tmpfile(...)
+            local fd, err = io_tmpfile(...)
+            if fd and debug_setmetatable then
+               if not compat_file_meta_loaded then
+                  local file_meta = gmt(fd)
+                  load_compat_file_meta(file_meta)
+               end
+               debug_setmetatable(fd, compat_file_meta)
+            end
+
+            return fd, err
+         end
+      end
 
    end -- lua 5.1
 

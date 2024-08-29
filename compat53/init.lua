@@ -17,9 +17,15 @@ if lua_version < "5.3" then
    local file_meta = gmt(io.stdout)
 
 
+   -- detect LuaJIT (including LUAJIT_ENABLE_LUA52COMPAT compilation flag)
+   local is_luajit = (string.dump(function() end) or ""):sub(1, 3) == "\027LJ"
+   local is_luajit52 = is_luajit and
+     #setmetatable({}, { __len = function() return 1 end }) == 1
+
+
    if type(file_meta) == "table" and type(file_meta.__index) == "table" then
       local file_mt = require("compat53.file_mt")
-      file_mt.update_file_meta(file_meta)
+      file_mt.update_file_meta(file_meta, is_luajit52)
    end -- got a valid metatable for file objects
 
 
@@ -35,12 +41,6 @@ if lua_version < "5.3" then
       local coroutine_status = coroutine.status
       local coroutine_yield = coroutine.yield
       local io_type = io.type
-
-
-      -- detect LuaJIT (including LUAJIT_ENABLE_LUA52COMPAT compilation flag)
-      local is_luajit = (string.dump(function() end) or ""):sub(1, 3) == "\027LJ"
-      local is_luajit52 = is_luajit and
-        #setmetatable({}, { __len = function() return 1 end }) == 1
 
 
       -- make package.searchers available as an alias for package.loaders

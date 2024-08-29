@@ -36,6 +36,8 @@ end
 local V = _VERSION:gsub("^.*(%d+)%.(%d+)$", "%1%2")
 if jit then V = "jit" end
 
+local is_puclua51 = (_VERSION == "Lua 5.1" and not jit)
+
 local mode = "global"
 if arg[1] == "module" then
   mode = "module"
@@ -588,17 +590,19 @@ do
    io.input("data.txt")
    print("io.read()", io.read("n", "number", "l", "a"))
    io.input(io.stdin)
-   local f = assert(io.open("data.txt", "r"))
-   print("file:read()", f:read("*n", "*number", "*l", "*a"))
-   f:close()
-   f = assert(io.open("data.txt", "r"))
-   print("file:read()", f:read("n", "number", "l", "a"))
-   f:close()
-   os.remove("data.txt")
+   if not is_puclua51 then
+      local f = assert(io.open("data.txt", "r"))
+      print("file:read()", f:read("*n", "*number", "*l", "*a"))
+      f:close()
+      f = assert(io.open("data.txt", "r"))
+      print("file:read()", f:read("n", "number", "l", "a"))
+      f:close()
+      os.remove("data.txt")
 
-   local g = assert(io.open("data.txt", "w"))
-   print("io.open => file:write()", type(g:write("hello")))
-   g:close()
+      local g = assert(io.open("data.txt", "w"))
+      print("io.open => file:write()", type(g:write("hello")))
+      g:close()
+   end
    os.remove("data.txt")
 end
 

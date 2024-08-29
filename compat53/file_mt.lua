@@ -12,7 +12,7 @@ local function addasterisk(fmt)
    end
 end
 
-function M.update_file_meta(file_meta)
+function M.update_file_meta(file_meta, is_luajit52)
 
    -- make '*' optional for file:read and file:lines
 
@@ -56,13 +56,15 @@ function M.update_file_meta(file_meta)
       return file_read(self, ...)
    end
 
-   local file_write = file_meta.__index.write
-   file_meta.__index.write = function(self, ...)
-      local ret, err = file_write(self, ...)
-      if ret then
-         return self
+   if not is_luajit52 then
+      local file_write = file_meta.__index.write
+      file_meta.__index.write = function(self, ...)
+         local ret, err = file_write(self, ...)
+         if ret then
+            return self
+         end
+         return ret, err
       end
-      return ret, err
    end
 end
 
