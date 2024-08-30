@@ -848,7 +848,7 @@ if lua_version < "5.3" then
          end
 
          function M.io.open(...)
-            local fd, err = io_open(...)
+            local fd, err, code = io_open(...)
             if fd and debug_setmetatable then
                if not compat_file_meta_loaded then
                   local file_meta = gmt(fd)
@@ -857,11 +857,15 @@ if lua_version < "5.3" then
                debug_setmetatable(fd, compat_file_meta)
             end
 
-            return fd, err
+            if fd then
+               return fd
+            else
+               return fd, err, code
+            end
          end
 
          function M.io.popen(...)
-            local fd, err = io_popen(...)
+            local fd, err, code = io_popen(...)
             if fd and debug_setmetatable then
                if not compat_file_meta_loaded then
                   local file_meta = gmt(fd)
@@ -870,11 +874,15 @@ if lua_version < "5.3" then
                debug_setmetatable(fd, compat_file_meta)
             end
 
-            return fd, err
+            if fd then
+               return fd
+            else
+               return fd, err, code
+            end
          end
 
          function M.io.tmpfile(...)
-            local fd, err = io_tmpfile(...)
+            local fd, err, code = io_tmpfile(...)
             if fd and debug_setmetatable then
                if not compat_file_meta_loaded then
                   local file_meta = gmt(fd)
@@ -883,7 +891,11 @@ if lua_version < "5.3" then
                debug_setmetatable(fd, compat_file_meta)
             end
 
-            return fd, err
+            if fd then
+               return fd
+            else
+               return fd, err, code
+            end
          end
       end
 
