@@ -142,7 +142,7 @@ static int l_checkmode (const char *mode) {
 typedef luaL_Stream LStream;
 
 
-#define tolstream(L)	(luaL_checktype(L, 1, LUA_TUSERDATA), (LStream *)lua_touserdata(L, 1))
+#define tolstream(L)	((LStream *)luaL_checkudata(L, 1, LUA_FILEHANDLE))
 
 #define isclosed(p)	((p)->closef == NULL)
 
