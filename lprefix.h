@@ -195,7 +195,7 @@ LUAMOD_API int luaopen_compat53_string (lua_State *L) {
 #  endif
 
 /* choose which popen implementation to pick */
-#  if defined(_MSC_VER)
+#  if (defined(_WIN32) && !defined(__CYGWIN__))
 #    define LUA_USE_WINDOWS 1
 #  endif
 #  if (!defined(LUA_USE_WINDOWS) && !defined(LUA_USE_POSIX)) && \
