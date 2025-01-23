@@ -828,7 +828,7 @@ if lua_version < "5.3" then
 
       if is_luajit then
          local compat_file_meta = {}
-         local compat_file_meta_loaded = false
+         local compat_file_meta_loaded = 0
 
          local function load_compat_file_meta(file_meta)
             -- fill compat_file_meta with original entries
@@ -840,62 +840,43 @@ if lua_version < "5.3" then
                compat_file_meta.__index[k] = v
             end
 
-            -- update it with compatibility functions
-            local file_mt = require("compat53.file_mt")
-            file_mt.update_file_meta(compat_file_meta, is_luajit52)
+            compat_file_meta_loaded = 1
 
-            compat_file_meta_loaded = true
+            -- update it with compatibility functions
+            local file_mt_ok, file_mt = pcall(require, "compat53.file_mt")
+            if file_mt_ok then
+               file_mt.update_file_meta(compat_file_meta, is_luajit52)
+
+               compat_file_meta_loaded = 2
+            end
+         end
+
+         local function return_fd(fd, err, code)
+            if not fd then
+               return fd, err, code
+            end
+            if fd and debug_setmetatable then
+               if compat_file_meta_loaded == 0 then
+                  local file_meta = gmt(fd)
+                  load_compat_file_meta(file_meta)
+               end
+               if compat_file_meta_loaded == 2 then
+                  debug_setmetatable(fd, compat_file_meta)
+               end
+            end
+            return fd
          end
 
          function M.io.open(...)
-            local fd, err, code = io_open(...)
-            if fd and debug_setmetatable then
-               if not compat_file_meta_loaded then
-                  local file_meta = gmt(fd)
-                  load_compat_file_meta(file_meta)
-               end
-               debug_setmetatable(fd, compat_file_meta)
-            end
-
-            if fd then
-               return fd
-            else
-               return fd, err, code
-            end
+            return return_fd(io_open(...))
          end
 
          function M.io.popen(...)
-            local fd, err, code = io_popen(...)
-            if fd and debug_setmetatable then
-               if not compat_file_meta_loaded then
-                  local file_meta = gmt(fd)
-                  load_compat_file_meta(file_meta)
-               end
-               debug_setmetatable(fd, compat_file_meta)
-            end
-
-            if fd then
-               return fd
-            else
-               return fd, err, code
-            end
+            return return_fd(io_popen(...))
          end
 
          function M.io.tmpfile(...)
-            local fd, err, code = io_tmpfile(...)
-            if fd and debug_setmetatable then
-               if not compat_file_meta_loaded then
-                  local file_meta = gmt(fd)
-                  load_compat_file_meta(file_meta)
-               end
-               debug_setmetatable(fd, compat_file_meta)
-            end
-
-            if fd then
-               return fd
-            else
-               return fd, err, code
-            end
+            return return_fd(io_tmpfile(...))
          end
       end
 
