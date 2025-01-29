@@ -23,7 +23,7 @@ jobs:
       - uses: uraimo/run-on-arch-action@v2
         with:
           arch: ${{ matrix.arch }}
-          distro: ubuntu22.04
+          distro: ubuntu_rolling
           githubToken: ${{ github.token }}
           setup: |
             mkdir -p ".install/${{ matrix.arch }}"
