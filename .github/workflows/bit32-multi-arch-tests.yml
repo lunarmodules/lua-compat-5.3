@@ -20,10 +20,10 @@ jobs:
         with:
           path: .install/${{ matrix.arch }}/lua-${{ matrix.luaVersion }}
           key: lua-on-linux-${{ matrix.arch }}-${{ matrix.luaVersion }}
-      - uses: uraimo/run-on-arch-action@v2.0.7
+      - uses: uraimo/run-on-arch-action@v2
         with:
           arch: ${{ matrix.arch }}
-          distro: ubuntu20.04
+          distro: ubuntu22.04
           githubToken: ${{ github.token }}
           setup: |
             mkdir -p ".install/${{ matrix.arch }}"
