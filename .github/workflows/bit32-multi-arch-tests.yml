@@ -20,16 +20,16 @@ jobs:
         with:
           path: .install/${{ matrix.arch }}/lua-${{ matrix.luaVersion }}
           key: lua-on-linux-${{ matrix.arch }}-${{ matrix.luaVersion }}
-      - uses: uraimo/run-on-arch-action@v2.0.7
+      - uses: uraimo/run-on-arch-action@v2
         with:
           arch: ${{ matrix.arch }}
-          distro: ubuntu20.04
+          distro: ubuntu_rolling
           githubToken: ${{ github.token }}
           setup: |
             mkdir -p ".install/${{ matrix.arch }}"
           install: |
             apt-get update -q -y
-            apt-get install -q -y curl unzip build-essential libreadline-dev libncurses-dev
+            apt-get install -q -y curl unzip build-essential libreadline-dev libncurses-dev clang
             rm -rf /var/lib/apt/lists/*
           run: |
             v() {
@@ -38,6 +38,7 @@ jobs:
               echo -e "\033[0m" >&2
               "$@"
             }
+            export CC=clang
             if [ "${{ steps.lua-cache.outputs.cache-hit }}" != true ]; then
               (set -o pipefail; cd ".install/${{ matrix.arch }}" && v curl --fail --silent --location "http://www.lua.org/ftp/lua-${{ matrix.luaVersion }}.tar.gz" | tar xzpf -)
               (cd ".install/${{ matrix.arch }}/lua-${{ matrix.luaVersion }}" && v make linux)
