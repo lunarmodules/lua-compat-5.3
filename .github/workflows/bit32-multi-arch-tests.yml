@@ -29,7 +29,7 @@ jobs:
             mkdir -p ".install/${{ matrix.arch }}"
           install: |
             apt-get update -q -y
-            apt-get install -q -y curl unzip build-essential libreadline-dev libncurses-dev
+            apt-get install -q -y curl unzip build-essential libreadline-dev libncurses-dev clang
             rm -rf /var/lib/apt/lists/*
           run: |
             v() {
@@ -38,6 +38,7 @@ jobs:
               echo -e "\033[0m" >&2
               "$@"
             }
+            export CC=clang
             if [ "${{ steps.lua-cache.outputs.cache-hit }}" != true ]; then
               (set -o pipefail; cd ".install/${{ matrix.arch }}" && v curl --fail --silent --location "http://www.lua.org/ftp/lua-${{ matrix.luaVersion }}.tar.gz" | tar xzpf -)
               (cd ".install/${{ matrix.arch }}/lua-${{ matrix.luaVersion }}" && v make linux)
