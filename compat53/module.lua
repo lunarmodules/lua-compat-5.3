@@ -170,9 +170,9 @@ if lua_version < "5.3" then
       if cond then
          return cond, ...
       elseif select('#', ...) > 0 then
-         error((...), 0)
+         error((...), 2)
       else
-         error("assertion failed!", 0)
+         error("assertion failed!", 2)
       end
    end
 
