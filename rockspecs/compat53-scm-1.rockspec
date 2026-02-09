@@ -16,7 +16,7 @@ description = {
    license = "MIT"
 }
 dependencies = {
-   "lua >= 5.1, < 5.5",
+   "lua >= 5.1, < 5.6",
    --"struct" -- make Roberto's struct module optional
 }
 build = {
