@@ -46,8 +46,11 @@
 #include "c-api/compat-5.3.h"
 
 #undef LUAMOD_API
-#define LUAMOD_API extern
-
+#if defined(__GNUC__)
+#  define LUAMOD_API __attribute__((visibility("default"))) extern
+#else
+#  define LUAMOD_API extern
+#endif
 
 #ifdef lutf8lib_c
 #  define luaopen_utf8 luaopen_compat53_utf8
@@ -165,7 +168,7 @@ LUAMOD_API int luaopen_compat53_string (lua_State *L) {
  */
 #  undef LUAMOD_API
 #  if defined(__GNUC__) || __has_attribute(__unused__)
-#    define LUAMOD_API __attribute__((__unused__)) static
+#    define LUAMOD_API __attribute__((__unused__, visibility("default"))) static
 #  else
 #    define LUAMOD_API static
 #  endif
@@ -274,7 +277,7 @@ LUAMOD_API int luaopen_compat53_io (lua_State *L) {
  */
 #  undef LUAMOD_API
 #  if defined(__GNUC__) || __has_attribute(__unused__)
-#    define LUAMOD_API __attribute__((__unused__)) static
+#    define LUAMOD_API __attribute__((__unused__, visibility("default"))) static
 #  else
 #    define LUAMOD_API static
 #  endif
