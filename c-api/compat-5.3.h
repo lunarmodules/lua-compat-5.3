@@ -395,6 +395,26 @@ COMPAT53_API void luaL_requiref (lua_State *L, const char *modname,
 
 
 
+/* declarations for Lua 5.5 */
+#if defined(LUA_VERSION_NUM) && LUA_VERSION_NUM >= 505
+
+/*
+** Internal assertions for in-house debugging
+*/
+#if defined LUAI_ASSERT
+#  undef NDEBUG
+#  include <assert.h>
+#  define lua_assert(c)           assert(c)
+#endif
+
+#if !defined(lua_assert)
+#  define lua_assert(c)           ((void)0)
+#endif
+
+#endif /* Lua 5.5 only */
+
+
+
 /* other Lua versions */
 #if !defined(LUA_VERSION_NUM) || LUA_VERSION_NUM < 501 || LUA_VERSION_NUM > 505
 
