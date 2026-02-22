@@ -8,13 +8,13 @@ description = {
    summary = "Lua 5.2 bit manipulation library",
    detailed = [[
       bit32 is the native Lua 5.2 bit manipulation library, in the version
-      from Lua 5.3; it is compatible with Lua 5.1, 5.2, 5.3 and 5.4.
+      from Lua 5.3; it is compatible with Lua 5.1, 5.2, 5.3, 5.4 and 5.5.
    ]],
    homepage = "http://www.lua.org/manual/5.2/manual.html#6.7",
    license = "MIT"
 }
 dependencies = {
-   "lua >= 5.1, < 5.5"
+   "lua >= 5.1, < 5.6"
 }
 build = {
    type = "builtin",
