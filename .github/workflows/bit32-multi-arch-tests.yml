@@ -3,6 +3,7 @@ on:
   push:
     branches: ["master"]
   pull_request:
+    branches: ["master"]
 jobs:
   bit32-test:
     runs-on: ubuntu-latest
