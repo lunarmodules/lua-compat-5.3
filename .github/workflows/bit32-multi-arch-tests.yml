@@ -14,13 +14,13 @@ jobs:
         luaRocksVersion: ["3.3.1"]
         arch: ["armv7", "aarch64"]
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/cache@v2
+      - uses: actions/checkout@v6
+      - uses: actions/cache@v4
         id: lua-cache
         with:
           path: .install/${{ matrix.arch }}/lua-${{ matrix.luaVersion }}
           key: lua-on-linux-${{ matrix.arch }}-${{ matrix.luaVersion }}
-      - uses: uraimo/run-on-arch-action@v2
+      - uses: uraimo/run-on-arch-action@v3
         with:
           arch: ${{ matrix.arch }}
           distro: ubuntu_rolling
