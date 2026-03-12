@@ -44,7 +44,7 @@ jobs:
             compiler: g++
             external: true
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v6
       - name: install Lua
         run: |
           sudo apt install libreadline-dev
