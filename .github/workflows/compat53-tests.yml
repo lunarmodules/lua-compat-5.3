@@ -90,7 +90,6 @@ jobs:
         with:
           luaRocksVersion: "3.13.0"
       - run: lua -v && luarocks --version
-      - run: luarocks lint rockspecs/compat53-0.14.4-1.rockspec
       - run: luarocks lint rockspecs/compat53-scm-1.rockspec
       # Install the local version of compat53.
       - run: luarocks --local make rockspecs/compat53-scm-1.rockspec
