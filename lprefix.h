@@ -138,7 +138,7 @@ static const char *compat53_utf8_escape (lua_State* L, long x) {
 #    if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
 #      define l_sprintf(s,sz,f,i) (snprintf(s, sz, f, i))
 #    else
-#      define l_sprintf(s,sz,f,i) ((void)(sz), sprintf(s, f, i))
+#      define l_sprintf(s,sz,f,i) (snprintf(s, sz, f, i))
 #    endif
 #  endif
 
