@@ -449,7 +449,7 @@ if lua_version < "5.3" then
       -- create subtables
       M.coroutine = setmetatable({}, { __index = coroutine })
       M.os = setmetatable({}, { __index = os })
-      M.package = setmetatable({}, { __index = package })
+      M.package = setmetatable({}, { __index = package, __newindex = package })
 
       -- handle debug functions
       if type(debug) == "table" then

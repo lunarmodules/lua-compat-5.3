@@ -505,6 +505,12 @@ do
    print(prefix, package.searchpath("no:such:module", path, ":", "|"))
 end
 
+___''
+do
+   package.path = package.path .. ";;compat53-test"
+   assert(_G.package.path:find(";;compat53-test", 1, true), "package.path write not forwarded")
+end
+
 
 ___''
 if mode ~= "module" then
