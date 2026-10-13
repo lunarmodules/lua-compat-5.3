@@ -46,8 +46,11 @@
 #include "c-api/compat-5.3.h"
 
 #undef LUAMOD_API
-#define LUAMOD_API extern
-
+#if defined(__GNUC__)
+#  define LUAMOD_API __attribute__((visibility("default"))) extern
+#else
+#  define LUAMOD_API extern
+#endif
 
 #ifdef lutf8lib_c
 #  define luaopen_utf8 luaopen_compat53_utf8
